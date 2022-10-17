@@ -8,11 +8,11 @@ EMAIL_USE_TLS = False  # 与SMTP服务器通信时，是否启动TLS链接（安
 EMAIL_FROM_NAME = 'Super2021'
 
 # 对象存储信息
-# bucket_secret_id = 'AKIDNZVAYfV5NO9dqmTv5zcz4sPggPr2yc07'
-# bucket_secret_key = 'sTnqc7LJ0Q2NREl10h8IBn8CyTigNo31'
-# bucket_app_id = '-1309504341'
-# bucket_region = 'ap-beijing'
-# bucket_access = 'public-read'
+bucket_secret_id = 'AKIDNZVAYfV5NO9dqmTv5zcz4sPggPr2yc07'
+bucket_secret_key = 'sTnqc7LJ0Q2NREl10h8IBn8CyTigNo31'
+bucket_app_id = '-1309504341'
+bucket_region = 'ap-beijing'
+bucket_access = 'public-read'
 
 # MySQL数据库配置
 mysql_ENGINE = 'django.db.backends.mysql'
