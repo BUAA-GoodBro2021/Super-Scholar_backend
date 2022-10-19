@@ -125,3 +125,65 @@ def cache_get_list_by_diophila(request_body_json):
 
         cache.set(key, value)
     return value
+
+
+# 根据倒排索引还原论文摘要
+def get_work_abstract(abstract_inverted_index):
+    abstract_table = []
+    for key, value in abstract_inverted_index.items():
+        value_length = len(value)
+        for i in range(value_length):
+            abstract_table.insert(value[i], key)
+
+    abstract = ' '.join(abstract_table)
+    return abstract
+
+
+# 根据 请求体内的查询字典 进行缓存并获取查询结果
+def cache_get_single_by_diophila(request_body_json):
+    # 创建一个 OpenAlex 对象
+    open_alex = OpenAlex(open_alex_mailto_email)
+    # 生成缓存键
+    key = json.dumps(request_body_json)
+    # 获取查询结果
+    value = cache.get(key)
+    # 如果缓存中没有
+    if value is None:
+        if request_body_json['entity_type'] == 'works':
+            # 获取论文 ID
+            work_id = request_body_json['params']['id']
+            # 获取论文主要信息
+            work_body = open_alex.get_single_work(work_id)
+            # 根据倒排索引获得摘要
+            work_body['abstract'] = get_work_abstract(work_body['abstract_inverted_index'])
+            # 进行缓存
+            cache.set(key, work_body)
+
+            # # 获取引用这篇论文的论文
+            # work_cites = cache_get_list_by_diophila({
+            #     "entity_type": "works",
+            #     "params": {
+            #         "filter": {"cites": work_id},
+            #         "page": 1,
+            #         "per_page": 25
+            #     }
+            # })
+            # # 获取这篇论文引用的论文
+            # work_cited_by = cache_get_list_by_diophila({
+            #     "entity_type": "works",
+            #     "params": {
+            #         "filter": {"cited_by": work_id},
+            #         "page": 1,
+            #         "per_page": 25
+            #     }
+            # })
+            # # 获取这篇论文相关的论文
+            # work_related_to = cache_get_list_by_diophila({
+            #     "entity_type": "works",
+            #     "params": {
+            #         "filter": {"related_to": work_id},
+            #         "page": 1,
+            #         "per_page": 25
+            #     }
+            # })
+            return work_body  # , work_cites, work_cited_by, work_related_to

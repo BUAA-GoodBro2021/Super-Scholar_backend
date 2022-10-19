@@ -70,16 +70,51 @@ def get_index_data_view(request):
 def associate_content_view(request):
     if request.method == 'GET':
         # 获取请求体
-        data_json = json.loads(request.body.decode())
+        request_body_json = json.loads(request.body.decode())
 
         # 获取查询内容
-        entity_type = data_json['entity_type']
-        params = data_json['params']
+        entity_type = request_body_json['entity_type']
+        params = request_body_json['params']
         # 添加认证邮箱
         params['mailto'] = open_alex_mailto_email
-        response = requests.get(open_alex_base_url + entity_type, params=params)
+        response = requests.get(open_alex_base_url + "autocomplete/" + entity_type, params=params)
         return JsonResponse(response.json())
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
+
+# 用户查看具体单篇论文
+def get_single_work_data_view(request):
+    if request.method == 'GET':
+        # 获取请求体
+        request_body_json = json.loads(request.body.decode())
+
+        # 获取到论文主体，论文被引用，论文引用，相关论文
+        # work_body, work_cites, work_cited_by, work_related_to = cache_get_single_by_diophila(request_body_json)
+
+        # result = {'result': 1, 'message': r"查看论文成功！", "work_body": work_body, "work_cites": work_cites,
+        #          "work_cited_by": work_cited_by, "work_related_to": work_related_to}
+
+        # 获取到论文主体
+        work_body = cache_get_single_by_diophila(request_body_json)
+        result = {'result': 1, 'message': r"查看论文成功！", "work_body": work_body}
+
+        return JsonResponse(result)
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+
+
+# 用户筛选论文
+def get_work_list_data_view(request):
+    if request.method == 'GET':
+        # 获取请求体
+        request_body_json = json.loads(request.body.decode())
+        print(request_body_json)
+        work_list_data = cache_get_list_by_diophila(request_body_json)
+        result = {'result': 1, 'message': r"筛选论文成功！", "work_list_data": work_list_data}
+        return JsonResponse(result)
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)

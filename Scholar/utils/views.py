@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from django.core.cache import cache
+from django.http import HttpResponse
 
-# Create your views here.
+
+def clear_redis_all(request):
+    cache.clear()
+    return HttpResponse("OK")
