@@ -153,37 +153,12 @@ def cache_get_single_by_diophila(request_body_json):
             # 获取论文 ID
             work_id = request_body_json['params']['id']
             # 获取论文主要信息
-            work_body = open_alex.get_single_work(work_id)
+            value = open_alex.get_single_work(work_id)
             # 根据倒排索引获得摘要
-            work_body['abstract'] = get_work_abstract(work_body['abstract_inverted_index'])
+            value['abstract'] = get_work_abstract(value['abstract_inverted_index'])
             # 进行缓存
-            cache.set(key, work_body)
+            cache.set(key, value)
 
-            # # 获取引用这篇论文的论文
-            # work_cites = cache_get_list_by_diophila({
-            #     "entity_type": "works",
-            #     "params": {
-            #         "filter": {"cites": work_id},
-            #         "page": 1,
-            #         "per_page": 25
-            #     }
-            # })
-            # # 获取这篇论文引用的论文
-            # work_cited_by = cache_get_list_by_diophila({
-            #     "entity_type": "works",
-            #     "params": {
-            #         "filter": {"cited_by": work_id},
-            #         "page": 1,
-            #         "per_page": 25
-            #     }
-            # })
-            # # 获取这篇论文相关的论文
-            # work_related_to = cache_get_list_by_diophila({
-            #     "entity_type": "works",
-            #     "params": {
-            #         "filter": {"related_to": work_id},
-            #         "page": 1,
-            #         "per_page": 25
-            #     }
-            # })
-            return work_body  # , work_cites, work_cited_by, work_related_to
+            return value
+
+    return value

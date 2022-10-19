@@ -11,6 +11,6 @@ urlpatterns = [
     path("get_single_work_data_view", views.get_single_work_data_view),
 
     # 筛选实体
-    path("get_work_list_data_view", views.get_work_list_data_view),
+    path("get_list_of_works_data_view", views.get_list_of_works_data_view),
 
 ]
