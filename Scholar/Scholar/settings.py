@@ -40,8 +40,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     'corsheaders',  # 跨域请求
-    'user',         # 用户类
-    'utils',        # 工具类
+    'user',  # 用户类
+    'utils',  # 工具类
+    'search',  # 搜索类
 ]
 
 MIDDLEWARE = [
@@ -51,7 +52,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -123,16 +124,23 @@ DATABASES = {
 CACHES = {
     'default': {
         "BACKEND": redis_BACKEND,
-        "LOCATION": "redis://" + redis_HOST + ":" + str(redis_PORT),
+        "LOCATION": [
+            "redis://" + redis_HOST + ":" + str(redis_PORT_1),
+            "redis://" + redis_HOST + ":" + str(redis_PORT_2),
+            "redis://" + redis_HOST + ":" + str(redis_PORT_3),
+        ],
         'TIMEOUT': redis_TIMEOUT,
         "OPTIONS": {
             'MAX_ENTRIES': redis_MAX_ENTRIES,
+            # 'CONNECTION_POOL_CLASS': redis_CONNECTION_POOL_CLASS,
             'CULL_FREQUENCY': redis_CULL_FREQUENCY,
             "CLIENT_CLASS": redis_CLIENT_CLASS,
             "PASSWORD": redis_PASSWORD
         }
     }
 }
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

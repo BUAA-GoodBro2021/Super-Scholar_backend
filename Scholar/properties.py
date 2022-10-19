@@ -29,8 +29,11 @@ redis_TIMEOUT = 3600 * 24 * 1.5  # 缓存保存时间，单位秒，默认300
 redis_MAX_ENTRIES = 1600  # 缓存最大数据条数
 redis_CULL_FREQUENCY = 4  # 缓存条数到达最大值时，删除1/x的缓存数据
 redis_CLIENT_CLASS = "django_redis.client.DefaultClient"
+redis_CONNECTION_POOL_CLASS = "rediscluster.connection.ClusterConnectionPool"
 redis_PASSWORD = "Super2021"
-redis_PORT = 6382
+redis_PORT_1 = 6381
+redis_PORT_2 = 6382
+redis_PORT_3 = 6383
 
 # 查看IP地址
 aliyun_appcode = '1437a6fc99dc4078bfe01338d7132c2c'  # 开通服务后 买家中心-查看AppCode
