@@ -125,9 +125,7 @@ CACHES = {
     'default': {
         "BACKEND": redis_BACKEND,
         "LOCATION": [
-            "redis://" + redis_HOST + ":" + str(redis_PORT_1),
-            "redis://" + redis_HOST + ":" + str(redis_PORT_2),
-            "redis://" + redis_HOST + ":" + str(redis_PORT_3),
+            "redis://" + redis_HOST + ":" + str(redis_PORT),
         ],
         'TIMEOUT': redis_TIMEOUT,
         "OPTIONS": {

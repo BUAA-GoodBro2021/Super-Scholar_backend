@@ -1,16 +1,20 @@
 """
 Redis操作相关工具类
 """
+import json
 import django
 import os
 
+from diophila import OpenAlex
 from django.apps import apps
 from django.core.cache import cache
-
 
 # 根据所属APP名, 类名和id 进行缓存并获取该实体的缓存键和信息字典
 # (先看缓存是否存在, 如果不存在, 查询mysql信息并存入缓存, 返回缓存中的值)
 # 该函数必须需要被try包裹
+from properties import open_alex_mailto_email
+
+
 def cache_get_by_id(app_label, model_name, model_id):
     """
     :param app_label:   APP名
@@ -75,3 +79,49 @@ def cache_del_all(app_label, model_name):
     except Exception:
         return 0
     return 1
+
+
+# 根据 请求体内的查询字典 进行缓存并获取查询结果
+def cache_get_list_by_diophila(request_body_json):
+    # 创建一个 OpenAlex 对象
+    open_alex = OpenAlex(open_alex_mailto_email)
+    # 生成缓存键
+    key = json.dumps(request_body_json)
+    # 获取查询结果
+    value = cache.get(key)
+    # 如果缓存中没有
+    if value is None:
+        if request_body_json['entity_type'] == 'works':
+            value = list(open_alex.get_list_of_works(filters=request_body_json['params'].get('filter', None),
+                                                     search=request_body_json['params'].get('search', None),
+                                                     sort=request_body_json['params'].get('sort', None),
+                                                     per_page=int(request_body_json['params'].get('per_page', 25)),
+                                                     pages=[int(request_body_json['params'].get('page', 1)), ]))
+        elif request_body_json['entity_type'] == 'authors':
+            value = list(open_alex.get_list_of_authors(filters=request_body_json['params'].get('filter', None),
+                                                       search=request_body_json['params'].get('search', None),
+                                                       sort=request_body_json['params'].get('sort', None),
+                                                       per_page=int(request_body_json['params'].get('per_page', 25)),
+                                                       pages=[int(request_body_json['params'].get('page', 1)), ]))
+        elif request_body_json['entity_type'] == 'venues':
+            value = list(open_alex.get_list_of_venues(filters=request_body_json['params'].get('filter', None),
+                                                      search=request_body_json['params'].get('search', None),
+                                                      sort=request_body_json['params'].get('sort', None),
+                                                      per_page=int(request_body_json['params'].get('per_page', 25)),
+                                                      pages=[int(request_body_json['params'].get('page', 1)), ]))
+        elif request_body_json['entity_type'] == 'institutions':
+            value = list(open_alex.get_list_of_institutions(filters=request_body_json['params'].get('filter', None),
+                                                            search=request_body_json['params'].get('search', None),
+                                                            sort=request_body_json['params'].get('sort', None),
+                                                            per_page=int(
+                                                                request_body_json['params'].get('per_page', 25)),
+                                                            pages=[int(request_body_json['params'].get('page', 1)), ]))
+        elif request_body_json['entity_type'] == 'concepts':
+            value = list(open_alex.get_list_of_concepts(filters=request_body_json['params'].get('filter', None),
+                                                        search=request_body_json['params'].get('search', None),
+                                                        sort=request_body_json['params'].get('sort', None),
+                                                        per_page=int(request_body_json['params'].get('per_page', 25)),
+                                                        pages=[int(request_body_json['params'].get('page', 1)), ]))
+
+        cache.set(key, value)
+    return value

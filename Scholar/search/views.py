@@ -1,72 +1,85 @@
-import time
-
 import requests
-from diophila import OpenAlex
-from django.core.cache import cache
 from django.http import JsonResponse
+from properties import *
 
-# 创建一个 OpenAlex 对象
-open_alex = OpenAlex("zhouenshen@buaa.edu.cn")
+from utils.Redis_utils import *
 
 
 # 获取 OpenAlex 五大实体的数量
-def get_open_alex_num():
-    work_single = next(iter(open_alex.get_list_of_works(per_page=1, pages=[1, ])))
-    work_count = work_single['meta']['count']
-    author_single = next(iter(open_alex.get_list_of_authors(per_page=1)))
-    author_count = author_single['meta']['count']
-    venues_single = next(iter(open_alex.get_list_of_venues(per_page=1)))
-    venues_count = venues_single['meta']['count']
-    institutions_single = next(iter(open_alex.get_list_of_institutions(per_page=1)))
-    institutions_count = institutions_single['meta']['count']
-    concepts_single = next(iter(open_alex.get_list_of_concepts(per_page=1)))
-    concepts_count = concepts_single['meta']['count']
-
-    return work_count, author_count, venues_count, institutions_count, concepts_count
+def get_open_alex_data_num():
+    # 创建一个 OpenAlex 对象
+    open_alex = OpenAlex(open_alex_mailto_email)
+    key = "open_alex_num"
+    value = cache.get(key)
+    # 如果缓存中没有
+    if value is None:
+        work_single = next(iter(open_alex.get_list_of_works(per_page=1)))
+        work_count = work_single['meta']['count']
+        author_single = next(iter(open_alex.get_list_of_authors(per_page=1)))
+        author_count = author_single['meta']['count']
+        venues_single = next(iter(open_alex.get_list_of_venues(per_page=1)))
+        venues_count = venues_single['meta']['count']
+        institutions_single = next(iter(open_alex.get_list_of_institutions(per_page=1)))
+        institutions_count = institutions_single['meta']['count']
+        concepts_single = next(iter(open_alex.get_list_of_concepts(per_page=1)))
+        concepts_count = concepts_single['meta']['count']
+        value = work_count, author_count, venues_count, institutions_count, concepts_count
+        cache.set(key, value)
+    return value
 
 
 # 获取主页信息
-def get_index_data(work_per_page=25):
-    # 获取推荐的论文列表
-    recommended_work_list_by_cited_count = list(
-        open_alex.get_list_of_works(sort={"cited_by_count": "desc", }, per_page=work_per_page, pages=[1, ]))
-    # 获取最新论文
-    recommended_work_list_by_publication_date = list(
-        open_alex.get_list_of_works(sort={"publication_date": "desc", }, per_page=work_per_page, pages=[1, ]))
-    return recommended_work_list_by_cited_count, recommended_work_list_by_publication_date
-
-
-# # 获取主页信息
 def get_index_data_view(request):
     if request.method == 'GET':
+        # 获取引用量前25的论文
+        request_body_json = {
+            "entity_type": "works",
+            "params": {
+                "sort": {"cited_by_count": "desc"},
+                "page": 1,
+                "per_page": 25
+            }
+        }
+        recommended_work_list_by_cited_count = cache_get_list_by_diophila(request_body_json)
 
-        # 生成缓存键
-        key = "work?sort:desc|work?publication_date:desc"
-        value = cache.get(key)
-        # 缓存中没有
-        if value is None:
-            value = get_index_data(work_per_page=25)
-            cache.set(key, value)
-        recommended_work_list_by_cited_count, recommended_work_list_by_publication_date = value
+        # 获取发布时间前25的论文
+        request_body_json = {
+            "entity_type": "works",
+            "params": {
+                "sort": {"publication_date": "desc"},
+                "page": 1,
+                "per_page": 25
+            }
+        }
+        recommended_work_list_by_publication_date = cache_get_list_by_diophila(request_body_json)
 
+        # 获取主页五大实体的数据
+        work_count, author_count, venues_count, institutions_count, concepts_count = get_open_alex_data_num()
         result = {'result': 1, 'message': r"获取主页信息成功！",
                   "recommended_work_list_by_cited_count": recommended_work_list_by_cited_count,
-                  "recommended_work_list_by_publication_date": recommended_work_list_by_publication_date, }
+                  "recommended_work_list_by_publication_date": recommended_work_list_by_publication_date,
+                  "work_count": work_count, "author_count": author_count, "venues_count": venues_count,
+                  "institutions_count": institutions_count, "concepts_count": concepts_count}
         return JsonResponse(result)
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
 
-# t1 = time.time()
-# print(get_index_data())
-# t2 = time.time()
-# print(t2 - t1)
-params = {
-    "mailto": "zhouenshen@buaa.edu.cn",
-    # "q": "StyTr2",
-    "search": "Denoising Diffusion",
-}
-url = "https://api.openalex.org/" + "works"
-response = requests.get(url, params=params)
-print(response.json())
+# 联想用户搜索的内容
+def associate_content_view(request):
+    if request.method == 'GET':
+        # 获取请求体
+        data_json = json.loads(request.body.decode())
+
+        # 获取查询内容
+        entity_type = data_json['entity_type']
+        params = data_json['params']
+        # 添加认证邮箱
+        params['mailto'] = open_alex_mailto_email
+        response = requests.get(open_alex_base_url + entity_type, params=params)
+        return JsonResponse(response.json())
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+

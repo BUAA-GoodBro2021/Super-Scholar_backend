@@ -25,15 +25,13 @@ mysql_PORT = '3306'
 # Redis数据库配置
 redis_BACKEND = "django_redis.cache.RedisCache"
 redis_HOST = "152.136.213.16"
-redis_TIMEOUT = 3600 * 24 * 1.5  # 缓存保存时间，单位秒，默认300
-redis_MAX_ENTRIES = 1600  # 缓存最大数据条数
+redis_TIMEOUT = 3600 * 24 * 2  # 缓存保存时间，单位秒，默认300
+redis_MAX_ENTRIES = 6400  # 缓存最大数据条数
 redis_CULL_FREQUENCY = 4  # 缓存条数到达最大值时，删除1/x的缓存数据
 redis_CLIENT_CLASS = "django_redis.client.DefaultClient"
 redis_CONNECTION_POOL_CLASS = "rediscluster.connection.ClusterConnectionPool"
 redis_PASSWORD = "Super2021"
-redis_PORT_1 = 6381
-redis_PORT_2 = 6382
-redis_PORT_3 = 6383
+redis_PORT = 6381
 
 # 查看IP地址
 aliyun_appcode = '1437a6fc99dc4078bfe01338d7132c2c'  # 开通服务后 买家中心-查看AppCode
@@ -51,3 +49,7 @@ TOKEN_SECRET_KEY = "django-insecure-$+i^7be6bxag@%#rv)8g=q(rp&mvdep(4lb-t5helou)
 # 环境路由
 local_base_url = "http://127.0.0.1:8000"
 production_base_url = "https://scholar.super2021.com"
+
+# OpenAlex认证邮箱
+open_alex_mailto_email = "zhouenshen@buaa.edu.cn"
+open_alex_base_url = "https://api.openalex.org/"
