@@ -43,6 +43,14 @@ INSTALLED_APPS = [
     'user',  # 用户类
     'utils',  # 工具类
     'search',  # 搜索类
+    'author',  # 作者类
+    'collection',   # 收藏类
+    'comment',   # 评论类
+    'follow',   # 关注类
+    'form',   # 申请表单类
+    'history',   # 历史纪录类
+    'message',  # 站内信息类
+    'work',   # 论文类
 ]
 
 MIDDLEWARE = [
