@@ -35,6 +35,7 @@ def get_index_data_view(request):
         request_body_json = {
             "entity_type": "works",
             "params": {
+                "filter": {"to_publication_date": "2023-11-01"},
                 "sort": {"cited_by_count": "desc"},
                 "page": 1,
                 "per_page": 25
@@ -46,6 +47,7 @@ def get_index_data_view(request):
         request_body_json = {
             "entity_type": "works",
             "params": {
+                "filter": {"to_publication_date": "2023-11-01"},
                 "sort": {"publication_date": "desc"},
                 "page": 1,
                 "per_page": 25
@@ -84,30 +86,101 @@ def associate_content_view(request):
         return JsonResponse(result)
 
 
-# 用户查看具体单篇论文
-def get_single_work_data_view(request):
+# 用户查看具体单个实体
+def get_single_data_view(request):
     if request.method == 'GET':
         # 获取请求体
         request_body_json = json.loads(request.body.decode())
 
-        # 获取到论文主体
-        work_body = cache_get_single_by_diophila(request_body_json)
-        result = {'result': 1, 'message': r"获取论文详情成功！", "work_body": work_body}
-
+        if request_body_json['entity_type'] == 'works':
+            # 获取主体
+            single_data = cache_get_single_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"获取论文详情成功！", "single_data": single_data}
+        elif request_body_json['entity_type'] == 'authors':
+            # 获取主体
+            single_data = cache_get_single_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"获取作者详情成功！", "single_data": single_data}
+        elif request_body_json['entity_type'] == 'venues':
+            # 获取主体
+            single_data = cache_get_single_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"获取文献来源详情成功！", "single_data": single_data}
+        elif request_body_json['entity_type'] == 'institutions':
+            # 获取主体
+            single_data = cache_get_single_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"获取机构详情成功！", "single_data": single_data}
+        elif request_body_json['entity_type'] == 'concepts':
+            # 获取主体
+            single_data = cache_get_single_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"获取概念领域详情成功！", "single_data": single_data}
+        else:
+            result = {'result': 0, 'message': r"请求实体类型错误，该实体类型不属于网站所包含的实体！"}
         return JsonResponse(result)
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
 
-# 用户筛选论文
-def get_list_of_works_data_view(request):
+# 用户筛选实体
+def get_list_of_data_view(request):
     if request.method == 'GET':
         # 获取请求体
         request_body_json = json.loads(request.body.decode())
-        # 筛选论文
-        list_of_works = cache_get_list_by_diophila(request_body_json)
-        result = {'result': 1, 'message': r"筛选论文成功！", "list_of_works": list_of_works}
+
+        if request_body_json['entity_type'] == 'works':
+            # 筛选实体
+            list_of_data = cache_get_list_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"筛选论文成功！", "list_of_data": list_of_data}
+        elif request_body_json['entity_type'] == 'authors':
+            # 筛选实体
+            list_of_data = cache_get_list_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"筛选作者成功！", "list_of_data": list_of_data}
+        elif request_body_json['entity_type'] == 'venues':
+            # 筛选实体
+            list_of_data = cache_get_list_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"筛选文献来源成功！", "list_of_data": list_of_data}
+        elif request_body_json['entity_type'] == 'institutions':
+            # 筛选实体
+            list_of_data = cache_get_list_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"筛选机构成功！", "list_of_data": list_of_data}
+        elif request_body_json['entity_type'] == 'concepts':
+            # 筛选实体
+            list_of_data = cache_get_list_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"筛选概念领域成功！", "list_of_data": list_of_data}
+        else:
+            result = {'result': 0, 'message': r"请求实体类型错误，该实体类型不属于网站所包含的实体！"}
+        return JsonResponse(result)
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+
+
+# 用户对筛选论文进行分组
+def get_groups_of_data_view(request):
+    if request.method == 'GET':
+        # 获取请求体
+        request_body_json = json.loads(request.body.decode())
+        if request_body_json['entity_type'] == 'works':
+            # 分组实体
+            groups_of_data = cache_get_groups_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"论文分组成功！", "groups_of_data": groups_of_data}
+        elif request_body_json['entity_type'] == 'authors':
+            # 分组实体
+            groups_of_data = cache_get_groups_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"作者分组成功！", "groups_of_data": groups_of_data}
+        elif request_body_json['entity_type'] == 'venues':
+            # 分组实体
+            groups_of_data = cache_get_groups_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"文献来源分组成功！", "groups_of_data": groups_of_data}
+        elif request_body_json['entity_type'] == 'institutions':
+            # 分组实体
+            groups_of_data = cache_get_groups_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"机构分组成功！", "groups_of_data": groups_of_data}
+        elif request_body_json['entity_type'] == 'concepts':
+            # 分组实体
+            groups_of_data = cache_get_groups_by_diophila(request_body_json)
+            result = {'result': 1, 'message': r"概念领域分组成功！", "groups_of_data": groups_of_data}
+        else:
+            result = {'result': 0, 'message': r"请求实体类型错误，该实体类型不属于网站所包含的实体！"}
         return JsonResponse(result)
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
