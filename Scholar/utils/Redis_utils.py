@@ -81,7 +81,7 @@ def cache_del_all(app_label, model_name):
     return 1
 
 
-# 根据 请求体内的查询字典 进行缓存并获取查询结果
+# 获取筛选列表
 def cache_get_list_by_diophila(request_body_json):
     # 创建一个 OpenAlex 对象
     open_alex = OpenAlex(open_alex_mailto_email)
@@ -122,7 +122,45 @@ def cache_get_list_by_diophila(request_body_json):
                                                         sort=request_body_json['params'].get('sort', None),
                                                         per_page=int(request_body_json['params'].get('per_page', 25)),
                                                         pages=[int(request_body_json['params'].get('page', 1)), ]))
+        cache.set(key, value)
+    return value
 
+
+# 获取筛选分组
+def cache_get_groups_by_diophila(request_body_json):
+    # 创建一个 OpenAlex 对象
+    open_alex = OpenAlex(open_alex_mailto_email)
+    # 生成缓存键
+    key = json.dumps(request_body_json)
+    # 获取查询结果
+    value = cache.get(key)
+    # 如果缓存中没有
+    if value is None:
+        if request_body_json['entity_type'] == 'works':
+            value = open_alex.get_groups_of_works(filters=request_body_json['params'].get('filter', None),
+                                                  search=request_body_json['params'].get('search', None),
+                                                  sort=request_body_json['params'].get('sort', None),
+                                                  group_by=request_body_json['params'].get('group_by', None))
+        elif request_body_json['entity_type'] == 'authors':
+            value = open_alex.get_groups_of_authors(filters=request_body_json['params'].get('filter', None),
+                                                    search=request_body_json['params'].get('search', None),
+                                                    sort=request_body_json['params'].get('sort', None),
+                                                    group_by=request_body_json['params'].get('group_by', None))
+        elif request_body_json['entity_type'] == 'venues':
+            value = open_alex.get_groups_of_works(filters=request_body_json['params'].get('filter', None),
+                                                  search=request_body_json['params'].get('search', None),
+                                                  sort=request_body_json['params'].get('sort', None),
+                                                  group_by=request_body_json['params'].get('group_by', None))
+        elif request_body_json['entity_type'] == 'institutions':
+            value = open_alex.get_groups_of_works(filters=request_body_json['params'].get('filter', None),
+                                                  search=request_body_json['params'].get('search', None),
+                                                  sort=request_body_json['params'].get('sort', None),
+                                                  group_by=request_body_json['params'].get('group_by', None))
+        elif request_body_json['entity_type'] == 'concepts':
+            value = open_alex.get_groups_of_works(filters=request_body_json['params'].get('filter', None),
+                                                  search=request_body_json['params'].get('search', None),
+                                                  sort=request_body_json['params'].get('sort', None),
+                                                  group_by=request_body_json['params'].get('group_by', None))
         cache.set(key, value)
     return value
 
@@ -156,9 +194,26 @@ def cache_get_single_by_diophila(request_body_json):
             value = open_alex.get_single_work(work_id)
             # 根据倒排索引获得摘要
             value['abstract'] = get_work_abstract(value['abstract_inverted_index'])
-            # 进行缓存
-            cache.set(key, value)
-
-            return value
-
+        elif request_body_json['entity_type'] == 'authors':
+            # 获取作者 ID
+            author_id = request_body_json['params']['id']
+            # 获取作者主要信息
+            value = open_alex.get_single_author(author_id)
+        elif request_body_json['entity_type'] == 'venues':
+            # 获取文献来源 ID
+            author_id = request_body_json['params']['id']
+            # 获取文献来源主要信息
+            value = open_alex.get_single_author(author_id)
+        elif request_body_json['entity_type'] == 'institutions':
+            # 获取机构 ID
+            author_id = request_body_json['params']['id']
+            # 获取机构主要信息
+            value = open_alex.get_single_author(author_id)
+        elif request_body_json['entity_type'] == 'concepts':
+            # 获取概念领域 ID
+            author_id = request_body_json['params']['id']
+            # 获取概念领域主要信息
+            value = open_alex.get_single_author(author_id)
+        # 进行缓存
+        cache.set(key, value)
     return value
