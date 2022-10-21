@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 
 class Comment(models.Model):
 
@@ -12,5 +11,4 @@ class Comment(models.Model):
     content = models.TextField('评论内容', max_length=1024, default="")
 
     class Meta:
-
         db_table = 'scholar_comment'

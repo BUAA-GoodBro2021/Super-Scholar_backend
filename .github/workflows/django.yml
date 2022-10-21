@@ -1,0 +1,19 @@
+name: Backend deploy
+
+on:
+  push:
+    branches: main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: setup
+      run: sudo apt install sshpass
+    - name: pull and reload
+      env:
+        DST: ${{secrets.DST_FOLDER}}
+      run: |
+        sshpass -p ${{secrets.PASSWORD}} ssh -o StrictHostKeyChecking=no ${{secrets.USER}}@${{secrets.IP1}} "cd ${DST}; git pull;"
+        sshpass -p ${{secrets.PASSWORD}} ssh -o StrictHostKeyChecking=no ${{secrets.USER}}@${{secrets.IP2}} "cd ${DST}; git pull;"
+        sshpass -p ${{secrets.PASSWORD}} ssh -o StrictHostKeyChecking=no ${{secrets.USER}}@${{secrets.IP3}} "cd ${DST}; git pull;"

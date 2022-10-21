@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 
 class Author(models.Model):
 
@@ -8,5 +7,4 @@ class Author(models.Model):
     user_id = models.IntegerField('对应的用户id', default=0)
 
     class Meta:
-
         db_table = 'scholar_author'

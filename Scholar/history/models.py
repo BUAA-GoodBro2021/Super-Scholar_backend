@@ -1,8 +1,7 @@
 from django.db import models
 
-# Create your models here.
-class History(models.Model):
 
+class History(models.Model):
     work_id = models.CharField('对应作品的open_alex_id', max_length=50, default='')
     user_id = models.IntegerField('对应用户的id', default=0)
     created_time = models.DateTimeField('浏览时间', auto_now_add=True)

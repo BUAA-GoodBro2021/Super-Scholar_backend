@@ -27,7 +27,7 @@ redis_BACKEND = "django_redis.cache.RedisCache"
 redis_HOST = "152.136.213.16"
 redis_TIMEOUT = 3600 * 24 * 2  # 缓存保存时间，单位秒，默认300
 redis_MAX_ENTRIES = 6400  # 缓存最大数据条数
-redis_CULL_FREQUENCY = 4  # 缓存条数到达最大值时，删除1/x的缓存数据
+redis_CULL_FREQUENCY = 5  # 缓存条数到达最大值时，删除1/x的缓存数据
 redis_CLIENT_CLASS = "django_redis.client.DefaultClient"
 redis_CONNECTION_POOL_CLASS = "rediscluster.connection.ClusterConnectionPool"
 redis_PASSWORD = "Super2021"
@@ -40,11 +40,11 @@ aliyun_appcode = '1437a6fc99dc4078bfe01338d7132c2c'  # 开通服务后 买家中
 TOKEN_SECRET_KEY = "django-insecure-$+i^7be6bxag@%#rv)8g=q(rp&mvdep(4lb-t5helou)=l#-2("
 
 # 默认图片地址
-# default_favorite_url = 'https://global-1309504341.cos.ap-beijing.myqcloud.com/default-favorite.jpg'
-# default_avatar_url = 'https://global-1309504341.cos.ap-beijing.myqcloud.com/default.jpg'
-# default_avatar_url_match = 'https://random-avatar-1309504341.cos.ap-beijing.myqcloud.com/'
-# default_cover_1_url_match = 'https://random-cover-1-1309504341.cos.ap-beijing.myqcloud.com/'
-# default_cover_2_url_match = 'https://random-cover-2-1309504341.cos.ap-beijing.myqcloud.com/'
+default_favorite_url = 'https://global-1309504341.cos.ap-beijing.myqcloud.com/default-favorite.jpg'
+default_avatar_url = 'https://global-1309504341.cos.ap-beijing.myqcloud.com/default.jpg'
+default_avatar_url_match = 'https://random-avatar-1309504341.cos.ap-beijing.myqcloud.com/'
+default_cover_1_url_match = 'https://random-cover-1-1309504341.cos.ap-beijing.myqcloud.com/'
+default_cover_2_url_match = 'https://random-cover-2-1309504341.cos.ap-beijing.myqcloud.com/'
 
 # 环境路由
 local_base_url = "http://127.0.0.1:8000"

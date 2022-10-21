@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 
 class Work(models.Model):
 
@@ -10,5 +9,4 @@ class Work(models.Model):
     is_delete = models.BooleanField('论文是否删除', default=False)
 
     class Meta:
-
         db_table = 'scholar_work'
