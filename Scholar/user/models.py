@@ -1,15 +1,13 @@
 from django.db import models
 
-# Create your models here.
 
 class User(models.Model):
-
     # 基础信息
     username = models.CharField('用户名', max_length=100, default='')
     password = models.CharField('密码', max_length=32)
     email = models.EmailField()
-    introduction = models.TextField('自我介绍', blank=True, max_length=2048, \
-        default='Leave something to help others get to know you better!')
+    introduction = models.TextField('自我介绍', blank=True, max_length=2048,
+                                    default='Leave something to help others get to know you better!')
 
     # 头像
     avatar_url = models.CharField('用户头像路径', max_length=128, default='')
@@ -23,5 +21,4 @@ class User(models.Model):
     updated_time = models.DateTimeField('更新时间', auto_now=True)
 
     class Meta:
-
         db_table = 'scholar_user'
