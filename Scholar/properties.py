@@ -31,7 +31,7 @@ redis_CULL_FREQUENCY = 5  # 缓存条数到达最大值时，删除1/x的缓存�
 redis_CLIENT_CLASS = "django_redis.client.DefaultClient"
 redis_CONNECTION_POOL_CLASS = "rediscluster.connection.ClusterConnectionPool"
 redis_PASSWORD = "Super2021"
-redis_PORT = 6381
+redis_PORT = 6379
 
 # 查看IP地址
 aliyun_appcode = '1437a6fc99dc4078bfe01338d7132c2c'  # 开通服务后 买家中心-查看AppCode
