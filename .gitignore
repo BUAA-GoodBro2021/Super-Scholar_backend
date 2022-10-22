@@ -2,3 +2,6 @@
 *__pycache__
 *test.py
 Scholar/media/
+Scholar/.idea
+.idea
+.github
