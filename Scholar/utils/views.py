@@ -55,11 +55,8 @@ def active(request, token):
         user_dict['avatar_url'] = avatar_url
         # 同步缓存
         cache.set(user_key, user_dict)
-        print(1)
         # 同步mysql
-        print(datetime.datetime.now())
         celery_activate_user.delay(user_id, email, avatar_url)
-        print(datetime.datetime.now())
 
         # TODO 发送站内信
 
