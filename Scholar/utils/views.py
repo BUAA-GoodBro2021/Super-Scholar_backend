@@ -1,6 +1,10 @@
-from django.core.cache import cache
-from Login_utils import check_token
 from django.http import HttpResponse
+from django.shortcuts import render
+import random
+from properties import *
+from utils.tasks import *
+from utils.Login_utils import *
+from utils.Redis_utils import *
 
 
 def clear_redis_all(request):
@@ -49,11 +53,13 @@ def active(request, token):
         # 设置随机头像
         avatar_url = default_avatar_url_match + str(random.choice(range(1, 31))) + '.png'
         user_dict['avatar_url'] = avatar_url
-
         # 同步缓存
         cache.set(user_key, user_dict)
+        print(1)
         # 同步mysql
+        print(datetime.datetime.now())
         celery_activate_user.delay(user_id, email, avatar_url)
+        print(datetime.datetime.now())
 
         # TODO 发送站内信
 

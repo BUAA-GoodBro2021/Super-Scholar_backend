@@ -23,3 +23,17 @@ class User(models.Model):
 
     class Meta:
         db_table = 'scholar_user'
+
+    def to_dic(self):
+        return {
+            'user_id': self.id,
+            'username': self.username,
+            'email': self.email,
+
+            "avatar_url": self.avatar_url,
+
+            'is_active': self.is_active,
+
+            'created_time': self.created_time,
+            'updated_time': self.updated_time,
+        }

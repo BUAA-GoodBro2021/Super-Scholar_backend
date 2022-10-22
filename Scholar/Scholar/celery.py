@@ -4,7 +4,7 @@ from properties import *
 import os
 
 # 启动 celery
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Summer.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Scholar.settings')
 
 # 创建 celery
 app = Celery('Scholar',

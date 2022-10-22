@@ -21,9 +21,9 @@ def send_email(payload, email, mail_type):
     # 生成验证路由
     url = sign_token(payload)  # 加密生成字符串(其实就是登录令牌)
     if platform.system() == "Linux":
-        url = production_base_url + "/api/utils/email/" + url
+        url = production_base_url + "/utils/email/" + url
     else:
-        url = local_base_url + "/api/utils/email/" + url
+        url = local_base_url + "/utils/email/" + url
 
     # 定义邮件内容
     content = {'url': url}
