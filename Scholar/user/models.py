@@ -8,7 +8,8 @@ class User(models.Model):
     email = models.EmailField()
     introduction = models.TextField('自我介绍', blank=True, max_length=2048,
                                     default='Leave something to help others get to know you better!')
-    is_active = models.BooleanField('邮箱是否验证', default=False)
+    is_active = models.BooleanField('邮箱是否已经验证', default=False)
+    is_super = models.BooleanField('是否为超管', default=False)
 
     # 头像
     avatar_url = models.CharField('用户头像路径', max_length=128, default='')
