@@ -36,3 +36,19 @@ def sign_token(payload, exp=3600 * 24):
     token = jwt.encode(payload, TOKEN_SECRET_KEY, algorithm='HS256')
     return token
 
+# 校验登录令牌
+def check_token(token):
+    """
+    :param token: 登录令牌
+    :return: None - 失败(篡改,过期,为空)    payload - 成功
+    """
+    # 校验token
+    try:
+        # 查看令牌是否过期或者被篡改
+        payload = jwt.decode(token, TOKEN_SECRET_KEY, algorithms=['HS256'])
+    except Exception:
+        # 如果失败返回 0
+        return None
+    # 如果成功返回1
+    return payload
+
