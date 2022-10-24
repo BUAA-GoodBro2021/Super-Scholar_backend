@@ -35,7 +35,10 @@ def get_index_data_view(request):
         request_body_json = {
             "entity_type": "works",
             "params": {
-                "filter": {"to_publication_date": "2023-11-01"},
+                "filter": {
+                    "from_publication_date": "2000-01-01",
+                    "to_publication_date": "2023-11-01"     
+                },
                 "sort": {"cited_by_count": "desc"},
                 "page": 1,
                 "per_page": 25
