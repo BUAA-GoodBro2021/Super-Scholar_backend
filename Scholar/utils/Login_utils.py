@@ -69,7 +69,8 @@ def login_checker(func):
             return JsonResponse(result)
 
         # 获取token
-        token = request.POST.get('token', '')
+        token = request.META.get('HTTP_AUTHORIZATION')
+        # request.POST.get('token', '')
         # 校验token信息
         payload = check_token(token)
 
@@ -105,8 +106,9 @@ def login_body_checker(func):
             return JsonResponse(result)
 
         try:
-            post_body = json.loads(request.body)
-            token = post_body['token']
+            token = request.META.get('HTTP_AUTHORIZATION')
+            # post_body = json.loads(request.body)
+            # token = post_body['token']
         except Exception:
             result = {'result': 0, 'message': '参数格式错误!'}
             return JsonResponse(result)
