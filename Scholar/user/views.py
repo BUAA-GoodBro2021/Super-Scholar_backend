@@ -116,3 +116,56 @@ def login( request ):
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
+
+def find_password( request ):
+    """
+        :param request: 请求体
+        :return:        1 - 成功， 0 - 失败
+
+        请求体包含包含 username, password1, password2, email
+    """
+    if request.method == 'POST':
+
+        # 获取表单信息
+        data_json = json.loads(request.body.decode())
+        print(data_json)
+        username = data_json.get('username', '')
+        password1 = data_json.get('password1', '')
+        password2 = data_json.get('password2', '')
+
+        # 检测异常情况
+        if not User.objects.filter(username=username).exists():
+            result = {'result': 0, 'message': r'用户名不存在!'}
+            return JsonResponse(result)
+
+        if len(password1) == 0 or len(password2) == 0:
+            result = {'result': 0, 'message': r'用户名与密码不允许为空!'}
+            return JsonResponse(result)
+
+        if password1 != password2:
+            result = {'result': 0, 'message': r'两次密码不一致!'}
+            return JsonResponse(result)
+
+        # 获取该用户实体
+        user = User.objects.get(username=username)
+        email = user.email
+
+        if user.password == hash_encode(password1):
+            result = {'result': 0, 'message': r'修改前后密码相同!'}
+            return JsonResponse(result)
+
+        # 需要加密的信息
+        payload = { 'user_id': user.id, 'password': hash_encode(password1) }
+
+        # 发送邮件
+        send_result = send_email(payload, email, 'find')
+
+        if not send_result:
+            result = {'result': 0, 'message': r'发送失败!请检查邮箱格式'}
+            return JsonResponse(result)
+        else:
+            result = {'result': 1, 'message': r'发送成功!请及时在邮箱中完成修改密码的确认.'}
+            return JsonResponse(result)
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
