@@ -4,6 +4,7 @@ from user.models import *
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
+from user.tasks import celery_change_introduction
 from utils.Login_utils import hash_encode
 from utils.Redis_utils import cache_get_by_id
 
@@ -166,6 +167,26 @@ def find_password( request ):
         else:
             result = {'result': 1, 'message': r'发送成功!请及时在邮箱中完成修改密码的确认.'}
             return JsonResponse(result)
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+
+# 编辑个人简介。
+@login_checker
+def edit_introduction( request ):
+
+    if request.method == 'POST':
+        # 获取表单信息
+        data_json = json.loads(request.body.decode())
+        user_id = request.user_id
+        introduction = data_json.get('introduction', 'Leave something to help others get to know you better!')
+
+        # 修改数据库
+        user_dict = celery_change_introduction( user_id, introduction )
+
+        result = {'result': 1, 'message': r"修改成功！", 'user': user_dict}
+        return JsonResponse(result)
+
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)

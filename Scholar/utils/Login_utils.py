@@ -70,7 +70,7 @@ def login_checker(func):
 
         # 获取token
         token = request.META.get('HTTP_AUTHORIZATION')
-        # request.POST.get('token', '')
+
         # 校验token信息
         payload = check_token(token)
 

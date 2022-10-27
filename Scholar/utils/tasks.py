@@ -7,7 +7,6 @@ from user.models import User
 
 @app.task
 def celery_activate_user(user_id, email, avatar_url):
-    print(2)
     user = User.objects.get(id=user_id)
     user.is_active = True
     user.email = email
