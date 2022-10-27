@@ -204,7 +204,7 @@ def get_user( request ):
         # 获取用户id
         user_id = request.user_id
         # 获取用户信息
-        user_dict = cache_get_by_id('user', 'user', user_id)
+        user_key, user_dict = cache_get_by_id('user', 'user', user_id)
         result = {'result': 1, 'message': r"查找成功！", 'user': user_dict}
         return JsonResponse(result)
 
