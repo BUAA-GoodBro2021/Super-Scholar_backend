@@ -1,5 +1,5 @@
 import json
-
+from django.core.cache import cache
 from user.models import *
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
@@ -181,10 +181,31 @@ def edit_introduction( request ):
         user_id = request.user_id
         introduction = data_json.get('introduction', 'Leave something to help others get to know you better!')
 
+        # 获取信息
+        user_key, user_dict = cache_get_by_id('user', 'user', user_id)
+        # 修改信息，同步缓存
+        user_dict['introduction'] = introduction
+        cache.set(user_key, user_dict)
         # 修改数据库
-        user_dict = celery_change_introduction( user_id, introduction )
+        celery_change_introduction.delay( user_id, introduction )
 
         result = {'result': 1, 'message': r"修改成功！", 'user': user_dict}
+        return JsonResponse(result)
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+
+# 返回当前用户信息
+@login_checker
+def get_user( request ):
+
+    if request.method == 'POST':
+        # 获取用户id
+        user_id = request.user_id
+        # 获取用户信息
+        user_dict = cache_get_by_id('user', 'user', user_id)
+        result = {'result': 1, 'message': r"查找成功！", 'user': user_dict}
         return JsonResponse(result)
 
     else:
