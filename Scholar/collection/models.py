@@ -16,5 +16,15 @@ class CollectionPackage(models.Model):
     user_id = models.IntegerField('对应用户的id', default=0)
     sum = models.IntegerField('收藏夹的收藏数目', default=0)
 
+    def to_dic(self):
+        list = []
+        work_list = Collection.objects.filter(collection_package_id=self.id)
+        for work in work_list:
+            list.append( work.work_id)
+        return {
+            'name': self.name,
+            'works': list,
+        }
+
     class Meta:
         db_table = 'scholar_collection_package'

@@ -28,22 +28,17 @@ def cache_get_by_id(app_label, model_name, model_id):
 
     # 生成缓存键
     key = app_label + ":" + model_name + ":" + str(model_id)
-    print(key)
 
     # 得到需要进行操作的类
     model = apps.get_model(app_label=app_label, model_name=model_name)
-    print(model)
 
     # 获取缓存
     model_dict = cache.get(key)
-    print(model_dict)
 
     # 缓存中没有
     if model_dict is None:
         model_dict = model.objects.get(id=model_id).to_dic()
         cache.set(key, model_dict)
-
-    print( key, model_dict )
 
     return key, model_dict
 
