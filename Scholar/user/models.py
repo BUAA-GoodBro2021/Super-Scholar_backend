@@ -34,6 +34,7 @@ class User(models.Model):
             "avatar_url": self.avatar_url,
 
             'is_active': self.is_active,
+            'is_super': self.is_super,
 
             'created_time': self.created_time,
             'updated_time': self.updated_time,
