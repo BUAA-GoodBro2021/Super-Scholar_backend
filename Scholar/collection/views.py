@@ -99,3 +99,83 @@ def change_package_name( request ):
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
+
+@login_checker
+def collect_work( request ):
+    if request.method == 'POST':
+        # 获取表单信息
+        data_json = json.loads(request.body.decode())
+        user_id = request.user_id
+        work_id = data_json.get('work_id')
+        package_id = data_json.get('package_id', '-1')
+
+        # 尝试获取收藏夹信息
+        try:
+            package_key, package_dict = cache_get_by_id('collection', 'collectionpackage', package_id )
+        except:
+            result = {'result': 0, 'message': r"收藏夹不存在"}
+            return JsonResponse(result)
+
+        # 异常处理
+        if user_id != package_dict['owner']:
+            result = {'result': 0, 'message': r"您没有权限！"}
+            return JsonResponse(result)
+
+        if work_id in package_dict['works']:
+            result = {'result': 0, 'message': r"您已将其加入收藏夹！"}
+            return JsonResponse(result)
+
+        # 修改缓存
+        package_dict['works'].append( work_id )
+        package_dict['sum'] += 1
+        cache.set(package_key, package_dict)
+
+        # 修改数据库
+        celery_add_collect.delay(package_id, work_id)
+
+        result = {'result': 1, 'message': r"收藏成功！", 'collection_package': package_dict}
+        return JsonResponse(result)
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+
+@login_checker
+def cancel_work( request ):
+    if request.method == 'POST':
+        # 获取表单信息
+        data_json = json.loads(request.body.decode())
+        user_id = request.user_id
+        work_id = data_json.get('work_id')
+        package_id = data_json.get('package_id', '-1')
+
+        # 尝试获取收藏夹信息
+        try:
+            package_key, package_dict = cache_get_by_id('collection', 'collectionpackage', package_id )
+        except:
+            result = {'result': 0, 'message': r"收藏夹不存在"}
+            return JsonResponse(result)
+
+        # 异常处理
+        if user_id != package_dict['owner']:
+            result = {'result': 0, 'message': r"您没有权限！"}
+            return JsonResponse(result)
+
+        if work_id not in package_dict['works']:
+            result = {'result': 0, 'message': r"您已将其移出收藏夹！"}
+            return JsonResponse(result)
+
+        # 修改缓存
+        package_dict['works'].remove( work_id )
+        package_dict['sum'] -= 1
+        cache.set(package_key, package_dict)
+
+        # 修改数据库
+        celery_cancel_collect.delay(package_id, work_id)
+
+        result = {'result': 1, 'message': r"取消收藏成功！", 'collection_package': package_dict}
+        return JsonResponse(result)
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)

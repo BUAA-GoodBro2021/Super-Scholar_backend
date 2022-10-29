@@ -2,8 +2,7 @@ from django.db import models
 
 
 class Collection(models.Model):
-    user_id = models.IntegerField('用户的id')
-    work_id = models.CharField('对应作品的open_alex_id', max_length=50)
+    work_id = models.CharField('对应作品的open_alex_id', max_length=200)
     collection_package_id = models.IntegerField('对应收藏夹的id')
 
     class Meta:
@@ -22,8 +21,11 @@ class CollectionPackage(models.Model):
         for work in work_list:
             list.append( work.work_id)
         return {
+            'id': self.id,
             'name': self.name,
             'works': list,
+            'owner': self.user_id,
+            'sum': self.sum,
         }
 
     class Meta:
