@@ -7,6 +7,7 @@ urlpatterns = [
     path('change_package_name', views.change_package_name),
     path('collect_work', views.collect_work),
     path('cancel_work', views.cancel_work),
+    path('delete_collection_package', views.delete_collection_package)
 
     # path("get_index_data_view", views.get_index_data),
 ]

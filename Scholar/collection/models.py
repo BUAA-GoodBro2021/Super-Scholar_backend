@@ -15,6 +15,8 @@ class CollectionPackage(models.Model):
     user_id = models.IntegerField('对应用户的id', default=0)
     sum = models.IntegerField('收藏夹的收藏数目', default=0)
 
+    is_active = models.BooleanField('是否删除', default=True)
+
     def to_dic(self):
         list = []
         work_list = Collection.objects.filter(collection_package_id=self.id)
@@ -26,6 +28,7 @@ class CollectionPackage(models.Model):
             'works': list,
             'owner': self.user_id,
             'sum': self.sum,
+            'is_active': self.is_active,
         }
 
     class Meta:

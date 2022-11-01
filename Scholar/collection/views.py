@@ -179,3 +179,38 @@ def cancel_work( request ):
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
+
+@login_checker
+def delete_collection_package( request ):
+    if request.method == 'POST':
+        # 获取表单信息
+        data_json = json.loads(request.body.decode())
+        user_id = request.user_id
+        package_id = data_json.get('package_id', '-1')
+
+        package = CollectionPackage.objects.filter( id = package_id ).first()
+
+        # 异常处理
+        if package is None:
+            result = {'result': 0, 'message': r"文件夹已删除！"}
+            return JsonResponse(result)
+
+        if package.user_id != user_id:
+            result = {'result': 0, 'message': r"您没有权限！"}
+            return JsonResponse(result)
+
+        package_key = 'collection:collectionpackage:' + package_id
+        # 修改缓存
+        cache.delete( package_key )
+
+        # 修改数据库
+        celery_delete_collection_package.delay(package_id)
+
+        result = {'result': 1, 'message': r"删除成功！"}
+        return JsonResponse(result)
+
+
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
