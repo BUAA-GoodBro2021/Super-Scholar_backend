@@ -12,10 +12,13 @@ def celery_change_package_name(package_id, package_name):
 @app.task
 def celery_add_collect(package_id, work_id):
 
-    package = Collection.objects.create(collection_package_id=package_id, work_id=work_id)
-    return package.to_dic()
+    Collection.objects.create(collection_package_id=package_id, work_id=work_id)
 
 @app.task
 def celery_cancel_collect(package_id, work_id):
 
-    Collection.get(collection_package_id=package_id, work_id=work_id).delete()
+    Collection.objects.filter(collection_package_id=package_id, work_id=work_id).delete()
+
+@app.task
+def celery_delete_collection_package(package_id):
+    CollectionPackage.objects.filter(id=package_id).delete()
