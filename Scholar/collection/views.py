@@ -1,18 +1,11 @@
-import json
 from django.core.cache import cache
-from user.models import *
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-from django.db.models import *
-from collection.models import *
 from collection.tasks import *
-from utils.Login_utils import hash_encode
-from utils.Redis_utils import cache_get_by_id
 
 from utils.Sending_utils import *
 
+
 @login_checker
-def add_collection_package( request ):
+def add_collection_package(request):
     if request.method == 'POST':
         # 获取表单信息
         data_json = json.loads(request.body.decode())
@@ -41,7 +34,7 @@ def add_collection_package( request ):
         # 创建收藏夹
         cp = CollectionPackage.objects.create(name=package_name, user_id=user_id)
         # 存储至缓存
-        cp_key, cp_dict = cache_get_by_id('collection', 'collectionpackage', cp.id )
+        cp_key, cp_dict = cache_get_by_id('collection', 'collectionpackage', cp.id)
 
         result = {'result': 1, 'message': r"添加成功！", 'collection_package': cp_dict}
         return JsonResponse(result)
@@ -50,14 +43,15 @@ def add_collection_package( request ):
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
+
 @login_checker
-def change_package_name( request ):
+def change_package_name(request):
     if request.method == 'POST':
         # 获取表单信息
         data_json = json.loads(request.body.decode())
         user_id = request.user_id
         package_name = data_json.get('package_name', '默认收藏夹')
-        package_id =data_json.get('package_id', '-1')
+        package_id = data_json.get('package_id', '-1')
 
         # 获取当前用户建立的所有收藏夹
         user_package = CollectionPackage.objects.filter(user_id=user_id)
@@ -85,7 +79,7 @@ def change_package_name( request ):
                 package_name = test_name
 
             # 存储至缓存
-            cp_key, cp_dict = cache_get_by_id('collection', 'collectionpackage', package_id )
+            cp_key, cp_dict = cache_get_by_id('collection', 'collectionpackage', package_id)
             # 修改缓存信息
             cp_dict['name'] = package_name
             # 同步数据库
@@ -100,8 +94,9 @@ def change_package_name( request ):
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
+
 @login_checker
-def collect_work( request ):
+def collect_work(request):
     if request.method == 'POST':
         # 获取表单信息
         data_json = json.loads(request.body.decode())
@@ -111,8 +106,8 @@ def collect_work( request ):
 
         # 尝试获取收藏夹信息
         try:
-            package_key, package_dict = cache_get_by_id('collection', 'collectionpackage', package_id )
-        except:
+            package_key, package_dict = cache_get_by_id('collection', 'collectionpackage', package_id)
+        except Exception:
             result = {'result': 0, 'message': r"收藏夹不存在"}
             return JsonResponse(result)
 
@@ -126,7 +121,7 @@ def collect_work( request ):
             return JsonResponse(result)
 
         # 修改缓存
-        package_dict['works'].append( work_id )
+        package_dict['works'].append(work_id)
         package_dict['sum'] += 1
         cache.set(package_key, package_dict)
 
@@ -140,8 +135,9 @@ def collect_work( request ):
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
+
 @login_checker
-def cancel_work( request ):
+def cancel_work(request):
     if request.method == 'POST':
         # 获取表单信息
         data_json = json.loads(request.body.decode())
@@ -151,8 +147,8 @@ def cancel_work( request ):
 
         # 尝试获取收藏夹信息
         try:
-            package_key, package_dict = cache_get_by_id('collection', 'collectionpackage', package_id )
-        except:
+            package_key, package_dict = cache_get_by_id('collection', 'collectionpackage', package_id)
+        except Exception:
             result = {'result': 0, 'message': r"收藏夹不存在"}
             return JsonResponse(result)
 
@@ -166,7 +162,7 @@ def cancel_work( request ):
             return JsonResponse(result)
 
         # 修改缓存
-        package_dict['works'].remove( work_id )
+        package_dict['works'].remove(work_id)
         package_dict['sum'] -= 1
         cache.set(package_key, package_dict)
 
