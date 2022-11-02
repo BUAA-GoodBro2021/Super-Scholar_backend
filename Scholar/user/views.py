@@ -11,6 +11,7 @@ def test(request):
 
 
 # 用户注册
+# TODO 密码强度检测。
 def register(request):
     """
     :param request: 请求体
