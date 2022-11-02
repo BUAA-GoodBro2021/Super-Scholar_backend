@@ -20,8 +20,9 @@ def add_collection_package(request):
 
         i = 1
         # 获取当前用户建立的所有收藏夹
+        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
         user_package = CollectionPackage.objects.filter(user_id=user_id)
-        print(user_package)
+
         # 寻找重复名称进行修改
         test_name = package_name
         while user_package.filter(name=test_name).exists():
@@ -35,6 +36,8 @@ def add_collection_package(request):
         cp = CollectionPackage.objects.create(name=package_name, user_id=user_id)
         # 存储至缓存
         cp_key, cp_dict = cache_get_by_id('collection', 'collectionpackage', cp.id)
+        user_dic['collection_package_id_list'].append(cp.id)
+        cache.set(user_key, user_dic)
 
         result = {'result': 1, 'message': r"添加成功！", 'collection_package': cp_dict}
         return JsonResponse(result)
@@ -185,20 +188,20 @@ def delete_collection_package(request):
         user_id = request.user_id
         package_id = data_json.get('package_id', '-1')
 
-        package = CollectionPackage.objects.filter(id=package_id).first()
+        # 获取当前用户建立的所有收藏夹
+        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
 
         # 异常处理
-        if package is None:
+        if int(package_id) not in user_dic['collection_package_id_list']:
             result = {'result': 0, 'message': r"文件夹已删除！"}
-            return JsonResponse(result)
-
-        if package.user_id != user_id:
-            result = {'result': 0, 'message': r"您没有权限！"}
             return JsonResponse(result)
 
         package_key = 'collection:collection_package:' + package_id
         # 修改缓存
         cache.delete(package_key)
+
+        user_dic['collection_package_id_list'].remove(int(package_id))
+        cache.set(user_key, user_dic)
 
         # 修改数据库
         celery_delete_collection_package.delay(package_id)
@@ -220,10 +223,11 @@ def get_collection_package_list(request):
         user_id = request.user_id
 
         package_list = []
-        package_id_list = CollectionPackage.objects.filter(user_id=user_id)
+        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+        package_id_list = user_dic['collection_package_id_list']
 
-        for package in package_id_list:
-            package_key, package_dic = cache_get_by_id('collection', 'collectionpackage', package.id)
+        for package_id in package_id_list:
+            package_key, package_dic = cache_get_by_id('collection', 'collectionpackage', package_id)
             package_list.append(package_dic)
 
         result = {'result': 1, 'message': r"查找成功！", "package_list": package_list}

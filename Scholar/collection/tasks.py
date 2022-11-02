@@ -13,11 +13,17 @@ def celery_change_package_name(package_id, package_name):
 def celery_add_collect(package_id, work_id):
 
     Collection.objects.create(collection_package_id=package_id, work_id=work_id)
+    cp = CollectionPackage.objects.get(id=package_id)
+    cp.sum += 1
+    cp.save()
 
 @app.task
 def celery_cancel_collect(package_id, work_id):
 
     Collection.objects.filter(collection_package_id=package_id, work_id=work_id).delete()
+    cp = CollectionPackage.objects.get(id=package_id)
+    cp.sum -= 1
+    cp.save()
 
 @app.task
 def celery_delete_collection_package(package_id):
