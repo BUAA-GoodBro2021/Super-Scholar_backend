@@ -21,4 +21,9 @@ def celery_cancel_collect(package_id, work_id):
 
 @app.task
 def celery_delete_collection_package(package_id):
+
+    # 删除其中收藏的论文
+    Collection.objects.filter(collection_package_id=package_id).delete()
+
+    # 删除收藏夹
     CollectionPackage.objects.filter(id=package_id).delete()

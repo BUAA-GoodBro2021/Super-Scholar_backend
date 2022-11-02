@@ -18,14 +18,12 @@ class CollectionPackage(models.Model):
     is_active = models.BooleanField('是否删除', default=True)
 
     def to_dic(self):
-        list = []
         work_list = Collection.objects.filter(collection_package_id=self.id)
-        for work in work_list:
-            list.append( work.work_id)
+        work_id_list = ( work.id for work in work_list )
         return {
             'id': self.id,
             'name': self.name,
-            'works': list,
+            'works': work_id_list,
             'owner': self.user_id,
             'sum': self.sum,
             'is_active': self.is_active,
