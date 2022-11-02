@@ -211,3 +211,26 @@ def delete_collection_package(request):
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
+
+
+@login_checker
+def get_collection_package_list(request):
+    if request.method == 'POST':
+        # 获取表单信息
+        user_id = request.user_id
+
+        package_list = []
+        package_id_list = CollectionPackage.objects.filter(user_id=user_id)
+
+        for package in package_id_list:
+            package_key, package_dic = cache_get_by_id('collection', 'collectionpackage', package.id)
+            package_list.append(package_dic)
+
+        result = {'result': 1, 'message': r"查找成功！", "package_list": package_list}
+        return JsonResponse(result)
+
+
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)

@@ -2,8 +2,8 @@ from django.db import models
 
 
 class Follow(models.Model):
-    follow_id = models.IntegerField('关注人的id', default=0)
-    followed_id = models.IntegerField('被关注人的id', default=0)
+    user_id = models.IntegerField('关注人的id', default=0)
+    author_id = models.CharField('被关注人的id', max_length=200, default='')
 
     class Meta:
         db_table = 'scholar_follow'
