@@ -18,7 +18,7 @@ class CollectionPackage(models.Model):
 
     def to_dic(self):
         work_list = Collection.objects.filter(collection_package_id=self.id)
-        work_id_list = ( work.id for work in work_list )
+        work_id_list = [work.id for work in work_list]
         return {
             'id': self.id,
             'name': self.name,

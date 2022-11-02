@@ -34,7 +34,7 @@ def add_collection_package(request):
         # 创建收藏夹
         cp = CollectionPackage.objects.create(name=package_name, user_id=user_id)
         # 存储至缓存
-        cp_key, cp_dict = cache_get_by_id('collection', 'collection_package', cp.id)
+        cp_key, cp_dict = cache_get_by_id('collection', 'collectionpackage', cp.id)
 
         result = {'result': 1, 'message': r"添加成功！", 'collection_package': cp_dict}
         return JsonResponse(result)
@@ -79,7 +79,7 @@ def change_package_name(request):
                 package_name = test_name
 
             # 存储至缓存
-            cp_key, cp_dict = cache_get_by_id('collection', 'collection_package', package_id)
+            cp_key, cp_dict = cache_get_by_id('collection', 'collectionpackage', package_id)
             # 修改缓存信息
             cp_dict['name'] = package_name
             # 同步数据库
@@ -106,7 +106,7 @@ def collect_work(request):
 
         # 尝试获取收藏夹信息
         try:
-            package_key, package_dict = cache_get_by_id('collection', 'collection_package', package_id)
+            package_key, package_dict = cache_get_by_id('collection', 'collectionpackage', package_id)
         except:
             result = {'result': 0, 'message': r"收藏夹不存在"}
             return JsonResponse(result)
@@ -147,7 +147,7 @@ def cancel_work(request):
 
         # 尝试获取收藏夹信息
         try:
-            package_key, package_dict = cache_get_by_id('collection', 'collection_package', package_id)
+            package_key, package_dict = cache_get_by_id('collection', 'collectionpackage', package_id)
         except:
             result = {'result': 0, 'message': r"收藏夹不存在"}
             return JsonResponse(result)
