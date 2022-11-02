@@ -1,4 +1,3 @@
-import json
 from django.core.cache import cache
 from collection.tasks import *
 

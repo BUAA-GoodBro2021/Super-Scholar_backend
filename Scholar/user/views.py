@@ -1,12 +1,7 @@
-import json
 from django.core.cache import cache
 from user.models import *
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-# Create your views here.
+from django.http import HttpResponse
 from user.tasks import celery_change_introduction
-from utils.Login_utils import hash_encode
-from utils.Redis_utils import cache_get_by_id
 
 from utils.Sending_utils import *
 
@@ -14,8 +9,9 @@ from utils.Sending_utils import *
 def test(request):
     return HttpResponse("Hello world!")
 
+
 # 用户注册
-def register( request ):
+def register(request):
     """
     :param request: 请求体
     :return:        1 - 成功， 0 - 失败
@@ -24,7 +20,7 @@ def register( request ):
     """
     if request.method == 'POST':
         data_json = json.loads(request.body.decode())
-        print( data_json)
+        print(data_json)
 
         username = data_json.get('username', '')
         password1 = data_json.get('password1', '')
@@ -33,7 +29,7 @@ def register( request ):
 
         if len(username) == 0 or len(password1) == 0 or len(password2) == 0 or len(email) == 0:
             result = {'result': 0, 'message': r'用户名, 邮箱, 与密码不允许为空!'}
-            return JsonResponse( result )
+            return JsonResponse(result)
 
         if User.objects.filter(username=username, is_active=True).exists():
             result = {
@@ -56,7 +52,7 @@ def register( request ):
             is_active=False
         )
 
-        payload = {'user_id': user.id, 'email': email }
+        payload = {'user_id': user.id, 'email': email}
 
         send_result = send_email(payload, email, 'register')
         if not send_result:
@@ -65,14 +61,12 @@ def register( request ):
         else:
             result = {'result': 1, 'message': r'发送成功!请及时在邮箱中查收.'}
             return JsonResponse(result)
-
-
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
 
-def login( request ):
+def login(request):
     """
         :param request: 请求体
         :return:        1 - 成功， 0 - 失败
@@ -83,7 +77,7 @@ def login( request ):
 
         # 获取表单信息
         data_json = json.loads(request.body.decode())
-        print( data_json )
+        print(data_json)
         username = data_json.get('username', '')
         password = data_json.get('password', '')
 
@@ -118,7 +112,8 @@ def login( request ):
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
-def find_password( request ):
+
+def find_password(request):
     """
         :param request: 请求体
         :return:        1 - 成功， 0 - 失败
@@ -156,7 +151,7 @@ def find_password( request ):
             return JsonResponse(result)
 
         # 需要加密的信息
-        payload = { 'user_id': user.id, 'password': hash_encode(password1) }
+        payload = {'user_id': user.id, 'password': hash_encode(password1)}
 
         # 发送邮件
         send_result = send_email(payload, email, 'find')
@@ -171,10 +166,10 @@ def find_password( request ):
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
+
 # 编辑个人简介。
 @login_checker
-def edit_introduction( request ):
-
+def edit_introduction(request):
     if request.method == 'POST':
         # 获取表单信息
         data_json = json.loads(request.body.decode())
@@ -187,7 +182,7 @@ def edit_introduction( request ):
         user_dict['introduction'] = introduction
         cache.set(user_key, user_dict)
         # 修改数据库
-        celery_change_introduction.delay( user_id, introduction )
+        celery_change_introduction.delay(user_id, introduction)
 
         result = {'result': 1, 'message': r"修改成功！", 'user': user_dict}
         return JsonResponse(result)
@@ -196,10 +191,10 @@ def edit_introduction( request ):
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
 
+
 # 返回当前用户信息
 @login_checker
-def get_user( request ):
-
+def get_user(request):
     if request.method == 'POST':
         # 获取用户id
         user_id = request.user_id

@@ -10,7 +10,6 @@ class Collection(models.Model):
 
 
 class CollectionPackage(models.Model):
-
     name = models.CharField('收藏夹的名字', max_length=50, default='默认收藏夹')
     user_id = models.IntegerField('对应用户的id', default=0)
     sum = models.IntegerField('收藏夹的收藏数目', default=0)
