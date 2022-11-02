@@ -1,7 +1,7 @@
 import requests
 from django.http import JsonResponse
 from properties import *
-
+from diophila import OpenAlex
 from utils.Redis_utils import *
 
 
