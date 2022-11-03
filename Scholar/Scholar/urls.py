@@ -25,6 +25,7 @@ urlpatterns = [
     path('collection/', include('collection.urls')),
     path('utils/', include('utils.urls')),
     path('follow/', include('follow.urls')),
+    path('form/', include('form.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
