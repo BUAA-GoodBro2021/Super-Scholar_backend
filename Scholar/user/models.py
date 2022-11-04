@@ -44,10 +44,11 @@ class User(models.Model):
 
             'is_active': self.is_active,
             'is_super': self.is_super,
+            'is_professional': self.is_professional,
 
             'created_time': self.created_time,
             'updated_time': self.updated_time,
 
             'collection_package_id_list': collection_package_id_list,
-            'follow_id_list' : follow_id_list,
+            'follow_id_list': follow_id_list,
         }
