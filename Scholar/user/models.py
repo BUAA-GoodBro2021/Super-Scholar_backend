@@ -19,7 +19,7 @@ class User(models.Model):
     avatar = models.FileField('用户头像', upload_to='', default='')
 
     # 权限判断
-    is_professional = models.BooleanField('是否认证', default=False)
+    is_professional = models.IntegerField('是否认证', default=-1)
 
     # 实体属性
     created_time = models.DateTimeField('创建时间', auto_now_add=True)
