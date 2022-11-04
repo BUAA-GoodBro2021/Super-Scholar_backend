@@ -40,3 +40,20 @@ class ComnentOfWorks(models.Model):
             'work_id': self.id,
             'comment_id_list': comment_id_list,
         }
+
+
+class CommentOfComments(models.Model):
+    id = models.IntegerField('回复的评论的id', primary_key=True, default=0)  # comment_id
+    comment_id_list = models.TextField('评论id', max_length=20000, default='')
+
+    class Meta:
+        db_table = 'scholar_comment_of_comments'
+
+    def to_dic(self):
+        comment_id_list = self.comment_id_list.split(' ')
+        comment_id_list = [int(comment_id) for comment_id in comment_id_list if comment_id != '']
+        print(comment_id_list)
+        return {
+            'comment_id': self.id,
+            'comment_id_list': comment_id_list,
+        }
