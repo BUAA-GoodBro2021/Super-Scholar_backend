@@ -24,7 +24,7 @@ def user_claim_author(request):  # 用户申请认领门户
         form_handling_key, form_handling_dic = cache_get_by_id('form', 'Form_list', 0)  # 从cache中获得正在处理的申请的id列表
         new_claim = models.Form.objects.create(author_id=author_id, content=content, user_id=user_id)
         cache_set_after_create('form', 'Form', new_claim.id, new_claim.to_dic())  # 将刚刚生成的表单放在redis中
-        new_author = models.Author.objects.create(open_alex_id=author_id, user_id=user_id)
+        new_author = models.Author.objects.create(open_alex_id=author_id, id=user_id)
         cache_set_after_create('author', "Author", new_author.id, new_author.to_dic())
         form_handling_dic["Form_id_list"].append(new_claim.id)  # 拓展redis中的正在申请列表
         cache.set(form_handling_key, form_handling_dic)  # 把更新后的未处理申请id列表保存在redis中
