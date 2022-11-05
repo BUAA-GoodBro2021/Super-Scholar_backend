@@ -13,15 +13,14 @@ class Form_list(models.Model):
 
 
 class Form(models.Model):
-    user_id = models.IntegerField('用户id', default=0)
+    id = models.IntegerField('用户id', primary_key=True)
     content = models.TextField('申请的内容', max_length=1024, default='')
     author_id = models.CharField('对应的open_alex_id', max_length=200, default='')
     is_pass = models.IntegerField('是否通过', default=0)  # 0表示正在审批，1表示申请通过，2表示申请拒绝
 
     def to_dic(self):
         return {
-            'id': self.id,
-            'user_id': self.user_id,
+            'user_id': self.id,
             'content': self.content,
             'author_id': self.author_id,
             'is_pass': self.is_pass,

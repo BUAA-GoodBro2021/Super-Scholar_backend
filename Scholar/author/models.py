@@ -8,7 +8,7 @@ class Author(models.Model):
 
     def to_dic(self):
         return {
-            'user_id': self.id,
+            'id': self.id,
             'open_alex_id': self.open_alex_id,
             'is_pass': self.is_pass,
         }
