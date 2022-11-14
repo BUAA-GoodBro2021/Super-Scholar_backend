@@ -2,13 +2,18 @@ from django.db import models
 
 
 class Work(models.Model):
-    open_alex_id = models.CharField('对应的open_alex_id', max_length=200, db_index=True, default='')
-    author_id = models.CharField('对应作者的open_alex_id', max_length=200, db_index=True, default='')
+    open_alex_id = models.CharField('对应作品的open_alex_id', max_length=200, db_index=True, default='')
+    author_id = models.CharField('上传pdf的作者的open_alex_id', max_length=200, db_index=True, default='')
     url = models.CharField('论文的访问路由', max_length=200)
+    has_pdf = models.IntegerField('是否有pdf', default=-1)  # -1表示没有pdf，0表示正在审核，1表示有pdf
     is_delete = models.BooleanField('论文是否删除', default=False)
 
     class Meta:
         db_table = 'scholar_work'
+
+
+class UploadWorkPdfFormList(models.Model):
+    id_list = models.TextField('申请上传论文pdf的表单id的列表', default='[]')
 
 
 class UploadWorkPdfForm(models.Model):
