@@ -20,7 +20,7 @@ class User(models.Model):
 
     # 权限判断
     is_professional = models.IntegerField('是否认证', default=-1)
-
+    open_alex_id = models.CharField('对应的open_alex_id', max_length=200, db_index=True, default='', null=True)
     # 实体属性
     created_time = models.DateTimeField('创建时间', auto_now_add=True)
     updated_time = models.DateTimeField('更新时间', auto_now=True)
@@ -45,7 +45,7 @@ class User(models.Model):
             'is_active': self.is_active,
             'is_super': self.is_super,
             'is_professional': self.is_professional,
-
+            'open_alex_id': self.open_alex_id,
             'created_time': self.created_time,
             'updated_time': self.updated_time,
 
