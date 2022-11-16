@@ -56,10 +56,10 @@ class UploadWorkPdfFormList(models.Model):
         }
 
 
-class UploadWorkPdfForm(models.Model):
-    user_id = models.IntegerField('发送申请的用户id')
-    author_id = models.CharField('发送申请的用户认领的作者的open_alex_id', max_length=200, db_index=True, default='')
-    word_id = models.CharField('申请的论文的open_alex_id', max_length=200, db_index=True, default='')
-    send_time = models.TimeField('申请时间')
-    url = models.CharField('论文的访问路由', max_length=200)
-    flag = models.IntegerField('处理状态', default=0)  # 0表示未处理，-1表示拒绝，1表示同意
+# class UploadWorkPdfForm(models.Model):
+#     user_id = models.IntegerField('发送申请的用户id')
+#     author_id = models.CharField('发送申请的用户认领的作者的open_alex_id', max_length=200, db_index=True, default='')
+#     word_id = models.CharField('申请的论文的open_alex_id', max_length=200, db_index=True, default='')
+#     send_time = models.TimeField('申请时间')
+#     url = models.CharField('论文的访问路由', max_length=200)
+#     flag = models.IntegerField('处理状态', default=0)  # 0表示未处理，-1表示拒绝，1表示同意
