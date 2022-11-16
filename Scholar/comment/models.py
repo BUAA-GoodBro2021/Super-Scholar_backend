@@ -19,6 +19,7 @@ class Comment(models.Model):
             'user_id': self.user_id,
             'level': self.level,
             'father_id': self.father_id,
+            'ancestor_id': self.ancestor_id,
             'created_time': self.created_time,
             'work_id': self.work_id,
             'content': self.content,

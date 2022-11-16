@@ -3,6 +3,7 @@ from utils.Redis_utils import cache_get_by_id
 
 
 def get_all_comments_by_comment_id(comment_id):
+    # 获取当前评论下的所有子级评论。
     all_comments = []
 
     # 获得当前评论的详细内容
@@ -20,10 +21,18 @@ def get_all_comments_by_comment_id(comment_id):
         all_comments.append(get_all_comments_by_comment_id(comment_id))
 
     comment_dic['son_comments'] = all_comments
+
+    # 获取当前评论的作者信息。
+    user_id = comment_dic['user_id']
+    user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+
+    comment_dic['user_information'] = user_dic
+
     return comment_dic
 
 
 def get_all_comments_by_work_id(work_id):
+    # 获取当前论文下的所有评论。
     all_comments = []
     key, comment_of_work_dic = cache_get_by_id('comment', 'comnentofworks', work_id)
 
