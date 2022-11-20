@@ -9,6 +9,7 @@ class Comment(models.Model):
     created_time = models.DateTimeField('创建时间', auto_now_add=True)
     work_id = models.CharField('评论文章的id', max_length=200, default="")
     content = models.TextField('评论内容', max_length=1024, default="")
+    is_deleted = models.BooleanField('评论是否被删除', default=False)
 
     class Meta:
         db_table = 'scholar_comment'
@@ -23,10 +24,11 @@ class Comment(models.Model):
             'created_time': self.created_time,
             'work_id': self.work_id,
             'content': self.content,
+            'is_deleted': self.is_deleted,
         }
 
 
-class ComnentOfWorks(models.Model):
+class CommentOfWorks(models.Model):
     id = models.CharField('评论文章的id', primary_key=True, max_length=200, default="")  # work_id
     comment_id_list = models.TextField('评论id', max_length=20000, default='')  # 其中只包含0级评论的id
 
@@ -36,7 +38,7 @@ class ComnentOfWorks(models.Model):
     def to_dic(self):
         comment_id_list = self.comment_id_list.split(' ')
         comment_id_list = [int(comment_id) for comment_id in comment_id_list if comment_id != '']
-        print(comment_id_list)
+        # print(comment_id_list)
         return {
             'work_id': self.id,
             'comment_id_list': comment_id_list,
@@ -53,7 +55,7 @@ class CommentOfComments(models.Model):
     def to_dic(self):
         comment_id_list = self.comment_id_list.split(' ')
         comment_id_list = [int(comment_id) for comment_id in comment_id_list if comment_id != '']
-        print(comment_id_list)
+        # print(comment_id_list)
         return {
             'comment_id': self.id,
             'comment_id_list': comment_id_list,

@@ -34,9 +34,9 @@ def add_comment(request):
         cache_set_after_create("comment", "comment", comment.id, comment.to_dic())
 
         # 延迟更新数据库
-        add_comment_of_work(comment.id, work_id)
+        add_comment_of_work.delay(comment.id, work_id)
 
-        result = {'result': 0, 'message': r"添加成功！"}
+        result = {'result': 1, 'message': r"添加成功！"}
         return JsonResponse(result)
 
 
@@ -55,7 +55,7 @@ def get_all_comments(request):
 
         all_comments = get_all_comments_by_work_id(work_id)
 
-        result = {'result': 0, 'message': r"查找成功！", 'all_comments': all_comments}
+        result = {'result': 1, 'message': r"查找成功！", 'all_comments': all_comments}
         return JsonResponse(result)
 
 
@@ -66,13 +66,14 @@ def get_all_comments(request):
 
 
 # 回复评论
+@login_checker
 def reply_comment(request):
     if request.method == 'POST':
         data_json = json.loads(request.body.decode())
         user_id = request.user_id
         work_id = data_json.get('work_id')
         content = data_json.get('content')
-        comment_id = data_json.get('comment_id')  # father_comment_id
+        comment_id = int(data_json.get('comment_id'))  # father_comment_id
 
         # 异常处理
         # 评论内容为空
@@ -85,18 +86,106 @@ def reply_comment(request):
 
         # 创建数据
         comment = Comment.objects.create(user_id=user_id, work_id=work_id, content=content,
-                                         father_id=comment_id,
+                                         father_id=comment_id, level=1,
                                          ancestor_id=father_comment_dic['ancestor_id'])
         # 更新缓存
         cache_set_after_create("comment", "comment", comment.id, comment.to_dic())
 
         # 延迟更新数据库
-        add_comment_of_comment(comment.id, comment_id)
+        print("Begin to update database!")
+        add_comment_of_comment.delay(comment.id, comment_id)
 
-        result = {'result': 0, 'message': r"添加成功！"}
+        result = {'result': 1, 'message': r"添加成功！"}
         return JsonResponse(result)
 
 
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
+
+
+# 删除评论
+@login_checker
+def delete_comment(request):
+    if request.method == 'POST':
+        data_json = json.loads(request.body.decode())
+        user_id = request.user_id
+        comment_id = int(data_json.get('comment_id'))
+
+        # 获取当前评论的信息
+        try:
+            comment_key, comment = cache_get_by_id('comment', 'comment', comment_id)
+        except:
+            result = {'result': 0, 'message': r"该条评论已被删除！"}
+            return JsonResponse(result)
+
+        # 异常处理
+        # 当前用户不是该评论的评论者
+        if user_id != comment['user_id']:
+            result = {'result': 0, 'message': r"您无法删除他人的评论！"}
+            return JsonResponse(result)
+
+        # 如果当前评论是顶级评论，则应该彻底删除
+        if comment['level'] == 0:
+            # 修改当前文章的缓存数据
+            work_id = comment['work_id']
+            print("work id is ", work_id)
+
+            comment_of_work_key, comment_of_work = cache_get_by_id('comment', 'commentofworks', work_id)
+            print(comment_of_work['comment_id_list'])
+
+            comment_of_work['comment_id_list'].remove(comment_id)
+
+            cache.set(comment_of_work_key, comment_of_work)
+
+            # 删除当前评论的缓存数据
+            cache_del_by_id('comment', 'comment', comment_id)
+            # 删除当前评论的子级评论信息缓存
+            cache_del_by_id('comment', 'commentofcomments', comment_id)
+
+
+        else:
+            # 删除当前评论的缓存数据
+            cache_del_by_id('comment', 'comment', comment_id)
+
+        delay_delete_comment.delay(comment_id, comment['work_id'], comment['level'])
+        result = {'result': 1, 'message': r"删除成功！"}
+        return JsonResponse(result)
+
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+
+
+def reset_all_comment(request):
+    if request.method == 'POST':
+        works = CommentOfWorks.objects.all()
+        for work in works:
+            work_id = work.id
+            comment_id_list = ""
+            comments = Comment.objects.filter(work_id=work_id).all()
+            for comment in comments:
+                comment_id_list += str(comment.id) + ' '
+
+            work.comment_id_list = comment_id_list
+            work.save()
+
+        comments = CommentOfComments.objects.all()
+        for comment in comments:
+            comment_id = comment.id
+            comment_id_list = ""
+            son_comments = Comment.objects.filter(father_id=comment_id).all()
+            for som_comment in son_comments:
+                comment_id_list += str(som_comment.id) + ' '
+
+            comment.comment_id_list = comment_id_list
+            comment.save()
+
+        result = {'result': 1, 'message': r"Reset all!"}
+        return JsonResponse(result)
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+

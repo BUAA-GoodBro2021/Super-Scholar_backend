@@ -122,6 +122,13 @@ def cache_del_all(app_label, model_name):
     return 1
 
 
+# 删除某个类下某个id的缓存
+def cache_del_by_id(app_label, model_name, model_id):
+    key = app_label + ":" + model_name + ":" + str(model_id)
+    cache.delete(key)
+    return 1
+
+
 # 获取筛选列表
 def cache_get_list_by_diophila(request_body_json):
     # 创建一个 OpenAlex 对象
