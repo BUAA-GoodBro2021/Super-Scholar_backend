@@ -85,9 +85,14 @@ def reply_comment(request):
         father_comment_key, father_comment_dic = cache_get_by_id('comment', 'comment', comment_id)
 
         # 创建数据
-        comment = Comment.objects.create(user_id=user_id, work_id=work_id, content=content,
-                                         father_id=comment_id, level=1,
-                                         ancestor_id=father_comment_dic['ancestor_id'])
+        comment = Comment.objects.create(
+            level=1,
+            user_id=user_id,
+            work_id=work_id,
+            content=content,
+            father_id=comment_id,
+            reply_user_id=father_comment_dic['user_id'],
+            ancestor_id=father_comment_dic['ancestor_id'])
         # 更新缓存
         cache_set_after_create("comment", "comment", comment.id, comment.to_dic())
 

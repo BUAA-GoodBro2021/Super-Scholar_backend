@@ -32,9 +32,6 @@ class User(models.Model):
         collection_package_list = CollectionPackage.objects.filter(user_id=self.id)
         collection_package_id_list = [cp.id for cp in collection_package_list]
 
-        follow_list = Follow.objects.filter(user_id=self.id)
-        follow_id_list = [f.author_id for f in follow_list]
-
         return {
             'user_id': self.id,
             'username': self.username,
@@ -50,5 +47,21 @@ class User(models.Model):
             'updated_time': self.updated_time,
 
             'collection_package_id_list': collection_package_id_list,
+        }
+
+
+class FollowOfUser(models.Model):
+    id = models.IntegerField('用户的id', primary_key=True, default=0)  # user_id
+    follow_id_list = models.TextField('被关注人的id列表', max_length=20000, default='')  # 其中只包含0级评论的id
+
+    class Meta:
+        db_table = 'scholar_follow_of_user'
+
+    def to_dic(self):
+        follow_id_list = self.follow_id_list.split('#')
+        follow_id_list = [follow_id for follow_id in follow_id_list if follow_id != '']
+        print(follow_id_list)
+        return {
+            'work_id': self.id,
             'follow_id_list': follow_id_list,
         }

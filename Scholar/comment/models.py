@@ -10,6 +10,7 @@ class Comment(models.Model):
     work_id = models.CharField('评论文章的id', max_length=200, default="")
     content = models.TextField('评论内容', max_length=1024, default="")
     is_deleted = models.BooleanField('评论是否被删除', default=False)
+    reply_user_id = models.IntegerField('回复评论的用户id', default=0)
 
     class Meta:
         db_table = 'scholar_comment'
@@ -25,6 +26,7 @@ class Comment(models.Model):
             'work_id': self.work_id,
             'content': self.content,
             'is_deleted': self.is_deleted,
+            'reply_user_id': self.reply_user_id,
         }
 
 
