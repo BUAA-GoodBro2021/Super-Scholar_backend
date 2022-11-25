@@ -26,7 +26,7 @@ def user_claim_author(request):  # 用户申请认领门户
             return JsonResponse({'result': 0, 'message': '用户正在申请认领门户，请放弃当前申请后再次申请'})
         if user_dic["is_professional"] == 1:
             return JsonResponse({'result': 0, 'message': '用户已经认领门户，请放弃当前门户后再次申请'})
-        form_handling_key, form_handling_dic = cache_get_by_id('form', 'Form_list', 0)  # 从cache中获得正在处理的申请的id列表
+        form_handling_key, form_handling_dic = cache_get_by_id('form', 'FormList', 0)  # 从cache中获得正在处理的申请的id列表
         new_claim = Form.objects.create(author_id=author_id, content=content, id=user_id)
         cache_set_after_create('form', 'Form', new_claim.id, new_claim.to_dic())  # 将刚刚生成的表单放在redis中
         user_dic["is_professional"] = 0  # 表示正在申请
@@ -55,7 +55,7 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
             cache.delete('form:Form:' + str(user_id))
             celery_del_form.delay(user_id)
 
-            form_handling_key, form_handling_dic = cache_get_by_id('form', 'Form_list', 0)  # 从cache中获得正在处理的申请的id列表
+            form_handling_key, form_handling_dic = cache_get_by_id('form', 'FormList', 0)  # 从cache中获得正在处理的申请的id列表
             form_handling_id_list = form_handling_dic["Form_id_list"]
             form_handling_id_list.remove(user_id)
             form_handling_dic["Form_id_list"] = form_handling_id_list
@@ -73,7 +73,7 @@ def manager_check_claim(request):  # 管理员查看未处理申请
         super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
         if not super_user_dic['is_super']:
             return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
-        form_handling_key, form_handling_dic = cache_get_by_id('form', 'Form_list', 0)  # 从cache中获得正在处理的申请的id列表
+        form_handling_key, form_handling_dic = cache_get_by_id('form', 'FormList', 0)  # 从cache中获得正在处理的申请的id列表
         form_handling_id_list = form_handling_dic["Form_id_list"]  # 取出需要的id列表
         form_handling_dic_list = []  # 初始化需要返回的字典列表
         for form_id in form_handling_id_list:
@@ -88,9 +88,12 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
         data_json = json.loads(request.body.decode())
         print(data_json)
         user_id = request.user_id
+        super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
+        if not super_user_dic['is_super']:
+            return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
         deal_result = int(data_json.get('deal_result', 2))
-
-        form_handling_key, form_handling_dic = cache_get_by_id('form', 'Form_list', 0)  # 从cache中获得正在处理的申请的id列表
+        user_id = int(data_json.get('user_id'))
+        form_handling_key, form_handling_dic = cache_get_by_id('form', 'FormList', 0)  # 从cache中获得正在处理的申请的id列表
         form_handling_id_list = form_handling_dic["Form_id_list"]
         form_handling_id_list.remove(user_id)
         form_handling_dic["Form_id_list"] = form_handling_id_list
