@@ -58,12 +58,12 @@ def user_upload_pdf(request):  # 用户上传pdf
         result = {'result': 0, 'message': r"上传失败！"}
         return JsonResponse(result)
     this_work.url = url
-    cache_set_after_create('work', 'Work', this_work.id, this_work.to_dic())
+    cache_set_after_create('work', 'work', this_work.id, this_work.to_dic())
 
     celery_save_pdf_url.delay(this_work.id, url)
     # 删除本地文件
     os.remove(os.path.join(BASE_DIR, "media/" + pdf.name))
-    upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'UploadWorkPdfFormList', 1)
+    upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'uploadworkpdfformlist', 1)
     upload_pdf_form_list_dic['id_list'].append(this_work.id)
     cache.set(upload_pdf_form_list_key, upload_pdf_form_list_dic)
     celery_add_pdf_upload_form_list.delay(1, this_work.id)
@@ -87,7 +87,7 @@ def user_re_upload_pdf(request):  # 用户再次上传pdf
     # user_id = request.POST.get('user_id', "")
     author_id = request.POST.get('author_id', '')
     try:
-        work_key, work_dic = cache_get_by_id('work', 'Work', work_id)
+        work_key, work_dic = cache_get_by_id('work', 'work', work_id)
     except:
         return JsonResponse({'result': 0, 'message': r"此论文暂无pdf"})
     if work_dic['has_pdf'] == 0:
@@ -130,7 +130,7 @@ def user_re_upload_pdf(request):  # 用户再次上传pdf
     celery_re_upload_pdf(work_id, user_id, url, author_id, pdf.name)
     # 删除本地文件
     os.remove(os.path.join(BASE_DIR, "media/" + pdf.name))
-    upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'UploadWorkPdfFormList', 1)
+    upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'uploadworkpdfformlist', 1)
     upload_pdf_form_list_dic['id_list'].append(work_id)
     cache.set(upload_pdf_form_list_key, upload_pdf_form_list_dic)
     celery_add_pdf_upload_form_list.delay(1, work_id)
@@ -143,7 +143,7 @@ def manager_check_upload_pdf(request):  # 管理员查看pdf上传申请列表
     super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
     if not super_user_dic['is_super']:
         return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
-    upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'UploadWorkPdfFormList', 1)
+    upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'uploadworkpdfformlist', 1)
     upload_pdf_form_id_list = upload_pdf_form_list_dic['id_list']
     upload_pdf_form_dic_list = []
     for upload_pdf_form_id in upload_pdf_form_id_list:
@@ -166,11 +166,11 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
     work_id = data_json.get('work_id')
     deal_result = data_json.get('deal_result')
     try:
-        work_key, work_dic = cache_get_by_id('work', 'Work', work_id)
+        work_key, work_dic = cache_get_by_id('work', 'work', work_id)
     except:
         return JsonResponse({'result': 0, 'message': '此论文不存在'})
 
-    upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'UploadWorkPdfFormList', 1)
+    upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'uploadworkpdfformlist', 1)
     upload_pdf_form_id_list = upload_pdf_form_list_dic['id_list']
     upload_pdf_form_id_list.remove(work_id)
     upload_pdf_form_list_dic['id_list'] = upload_pdf_form_id_list

@@ -18,7 +18,7 @@ def celery_add_form_list(form_type, form_id):
     form_id_list = eval(form_list.form_id_list)
     form_id_list.append(form_id)
     print(form_id_list)
-    form_list.Form_id_list = str(form_id_list)
+    form_list.form_id_list = str(form_id_list)
     form_list.save()
     print('celery_add_form_list')
 
@@ -29,7 +29,7 @@ def celery_remove_form_list(form_type, form_id):
     form_id_list = eval(form_list.form_id_list)
     form_id_list.remove(form_id)
     print(form_id_list)
-    form_list.Form_id_list = str(form_id_list)
+    form_list.form_id_list = str(form_id_list)
     form_list.save()
     print('celery_remove_form_list')
 
