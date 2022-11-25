@@ -26,7 +26,7 @@ def user_claim_author(request):  # 用户申请认领门户
             return JsonResponse({'result': 0, 'message': '用户正在申请认领门户，请放弃当前申请后再次申请'})
         if user_dic["is_professional"] == 1:
             return JsonResponse({'result': 0, 'message': '用户已经认领门户，请放弃当前门户后再次申请'})
-        form_handling_key, form_handling_dic = cache_get_by_id('form', 'formList', 0)  # 从cache中获得正在处理的申请的id列表
+        form_handling_key, form_handling_dic = cache_get_by_id('form', 'formlist', 0)  # 从cache中获得正在处理的申请的id列表
         new_claim = Form.objects.create(author_id=author_id, content=content, id=user_id)
         cache_set_after_create('form', 'form', new_claim.id, new_claim.to_dic())  # 将刚刚生成的表单放在redis中
         user_dic["is_professional"] = 0  # 表示正在申请
@@ -56,7 +56,7 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
             cache.delete('form:form:' + str(user_id))
             celery_del_form.delay(user_id)
 
-            form_handling_key, form_handling_dic = cache_get_by_id('form', 'formList', 0)  # 从cache中获得正在处理的申请的id列表
+            form_handling_key, form_handling_dic = cache_get_by_id('form', 'formlist', 0)  # 从cache中获得正在处理的申请的id列表
             form_handling_id_list = form_handling_dic["Form_id_list"]
             form_handling_id_list.remove(user_id)
             form_handling_dic["Form_id_list"] = form_handling_id_list
@@ -85,7 +85,7 @@ def manager_check_claim(request):  # 管理员查看未处理申请
         if not super_user_dic['is_super']:
             return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
         try:
-            form_handling_key, form_handling_dic = cache_get_by_id('form', 'formList', 0)  # 从cache中获得正在处理的申请的id列表
+            form_handling_key, form_handling_dic = cache_get_by_id('form', 'formlist', 0)  # 从cache中获得正在处理的申请的id列表
         except:
             return JsonResponse({'result': 0, 'message': '当前表单列表不存在'})
         form_handling_id_list = form_handling_dic["Form_id_list"]  # 取出需要的id列表
@@ -113,9 +113,12 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
         deal_result = int(data_json.get('deal_result', 2))
         user_id = int(data_json.get('user_id'))
-        form_handling_key, form_handling_dic = cache_get_by_id('form', 'formList', 0)  # 从cache中获得正在处理的申请的id列表
+        form_handling_key, form_handling_dic = cache_get_by_id('form', 'formlist', 0)  # 从cache中获得正在处理的申请的id列表
         form_handling_id_list = form_handling_dic["Form_id_list"]
-        form_handling_id_list.remove(user_id)
+        try:
+            form_handling_id_list.remove(user_id)
+        except:
+            return JsonResponse({'result': 0, 'message': '此用户没有申请'})
         form_handling_dic["Form_id_list"] = form_handling_id_list
         cache.set(form_handling_key, form_handling_dic)
         celery_remove_form_list.delay(0, user_id)
@@ -162,19 +165,26 @@ def manager_look_all_user(request):
         user_dic_list.append(user_dic)
     return JsonResponse({'result': 1, 'message': '获得所有用户成功', 'user_list': user_dic_list})
 
-# @login_checker
-# def manager_delete_user_author(request):
-#     data_json = json.loads(request.body.decode())
-#     print(data_json)
-#     user_id = request.user_id
-#     try:
-#         super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
-#     except:
-#         return JsonResponse({'result': 0, 'message': '当前用户不存在'})
-#     if not super_user_dic['is_super']:
-#         return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
-#     user_id = int(data_json.get('user_id'))
-#     user_key, user_dic = cache_get_by_id('user', 'user', user_id)
-#     if user_dic['is_professional'] != 1:
-#         return JsonResponse({'result': 0, 'message': '当前用户没有门户，无法解除'})
-#     else
+
+@login_checker
+def manager_delete_user_author(request):
+    data_json = json.loads(request.body.decode())
+    print(data_json)
+    user_id = request.user_id
+    try:
+        super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
+    except:
+        return JsonResponse({'result': 0, 'message': '当前用户不存在'})
+    if not super_user_dic['is_super']:
+        return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
+    user_id = int(data_json.get('user_id'))
+    user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+    if user_dic['is_professional'] != 1:
+        return JsonResponse({'result': 0, 'message': '此用户没有门户或正在申请，无法解除'})
+    else:
+        user_dic['is_professional'] = -1
+        user_dic['open_alex_id'] = None
+        user_dic['work_count'] = 0
+        cache.set(user_key, user_dic)
+        celery_delete_user_author.delay(user_id)
+        return JsonResponse({'result': 1, 'message': '解除门户成功'})

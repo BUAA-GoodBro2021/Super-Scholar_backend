@@ -59,3 +59,13 @@ def celery_change_user_pass(deal_result, user_id):
         user.open_alex_id = None
     user.save()
     print('celery_change_user_pass')
+
+
+@app.task
+def celery_delete_user_author(user_id):
+    user = User.objects.get(id=user_id)
+    user.is_professional = -1
+    user.open_alex_id = None
+    user.work_count = 0
+    user.save()
+    print('celery_delete_user_author')
