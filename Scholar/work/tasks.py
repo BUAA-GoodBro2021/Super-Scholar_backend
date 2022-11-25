@@ -1,3 +1,5 @@
+from django.utils.timezone import now
+
 from Scholar.celery import app
 from work.models import *
 

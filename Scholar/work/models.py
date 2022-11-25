@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.timezone import now
 
 
 class Work(models.Model):
@@ -16,8 +15,6 @@ class Work(models.Model):
     last_pdf = models.FileField('上次文章pdf', upload_to='', null=True)
     last_has_pdf = models.IntegerField('上次是否有pdf', default=-1)  # -1表示没有pdf，0表示正在审核，1表示有pdf
     last_send_time = models.DateTimeField('上次上传时间', null=True)
-
-    # is_delete = models.BooleanField('论文是否删除', default=False)
 
     def to_dic(self):
         return {
@@ -54,12 +51,3 @@ class UploadWorkPdfFormList(models.Model):
             'id': self.id,
             'id_list': eval(self.id_list)
         }
-
-
-# class UploadWorkPdfForm(models.Model):
-#     user_id = models.IntegerField('发送申请的用户id')
-#     author_id = models.CharField('发送申请的用户认领的作者的open_alex_id', max_length=200, db_index=True, default='')
-#     word_id = models.CharField('申请的论文的open_alex_id', max_length=200, db_index=True, default='')
-#     send_time = models.TimeField('申请时间')
-#     url = models.CharField('论文的访问路由', max_length=200)
-#     flag = models.IntegerField('处理状态', default=0)  # 0表示未处理，-1表示拒绝，1表示同意

@@ -1,5 +1,7 @@
 from random import Random
 from django.http import JsonResponse
+from django.utils.timezone import now
+
 from Scholar.settings import BASE_DIR
 from utils.Bucket_utils import Bucket
 from utils.Login_utils import login_checker
@@ -73,7 +75,6 @@ def user_upload_pdf(request):  # 用户上传pdf
 @login_checker
 def user_re_upload_pdf(request):  # 用户再次上传pdf
     user_id = request.user_id
-
     # 获取用户上传的头像并保存
     pdf = request.FILES.get("pdf", None)
     if not pdf:
@@ -147,7 +148,10 @@ def manager_check_upload_pdf(request):  # 管理员查看pdf上传申请列表
     upload_pdf_form_id_list = upload_pdf_form_list_dic['id_list']
     upload_pdf_form_dic_list = []
     for upload_pdf_form_id in upload_pdf_form_id_list:
-        work_id, work_dic = cache_get_by_id('work', 'work', upload_pdf_form_id)
+        try:
+            work_id, work_dic = cache_get_by_id('work', 'work', upload_pdf_form_id)
+        except:
+            return JsonResponse({'result': 0, 'message': '此论文没有上传pdf申请'})
         upload_pdf_form_dic_list.append(work_dic)
 
     return JsonResponse({'result': 1, 'message': '获取申请成功', 'upload_pdf_form_dic_list': upload_pdf_form_dic_list})
