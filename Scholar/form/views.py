@@ -131,6 +131,8 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             return JsonResponse({'result': 0, 'message': '该申请用户不存在'})
         if deal_result == 1:
             user_dic["is_professional"] = 1
+            form_key,form_dic = cache_get_by_id('form','form',user_id)
+            author_id = form_dic["author_id"]
             # user_dic['work_count'] =
         else:
             user_dic["is_professional"] = -1
@@ -161,3 +163,21 @@ def manager_look_all_user(request):
             continue
         user_dic_list.append(user_dic)
     return JsonResponse({'result': 1, 'message': '获得所有用户成功', 'user_list': user_dic_list})
+
+
+# @login_checker
+# def manager_delete_user_author(request):
+#     data_json = json.loads(request.body.decode())
+#     print(data_json)
+#     user_id = request.user_id
+#     try:
+#         super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
+#     except:
+#         return JsonResponse({'result': 0, 'message': '当前用户不存在'})
+#     if not super_user_dic['is_super']:
+#         return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
+#     user_id = int(data_json.get('user_id'))
+#     user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+#     if user_dic['is_professional'] != 1:
+#         return JsonResponse({'result': 0, 'message': '当前用户没有门户，无法解除'})
+#     else
