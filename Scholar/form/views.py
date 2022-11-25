@@ -16,10 +16,10 @@ def user_claim_author(request):  # 用户申请认领门户
         user_id = request.user_id
         author_id = data_json.get('author_id', '')
         print(author_id)
-        # try:
-        open_alex.get_single_author(author_id)
-        # except:
-        #     return JsonResponse({'result': 0, 'message': '申请的作者不存在'})
+        try:
+            open_alex.get_single_author(author_id)
+        except:
+            return JsonResponse({'result': 0, 'message': '申请的作者不存在'})
         user_key, user_dic = cache_get_by_id('user', 'user', user_id)
         print(user_dic)
         if user_dic["is_professional"] == 0:
@@ -27,7 +27,10 @@ def user_claim_author(request):  # 用户申请认领门户
         if user_dic["is_professional"] == 1:
             return JsonResponse({'result': 0, 'message': '用户已经认领门户，请放弃当前门户后再次申请'})
         form_handling_key, form_handling_dic = cache_get_by_id('form', 'formlist', 0)  # 从cache中获得正在处理的申请的id列表
-        new_claim = Form.objects.create(author_id=author_id, content=content, id=user_id)
+        try:
+            new_claim = Form.objects.create(author_id=author_id, content=content, id=user_id)
+        except:
+            return JsonResponse({'result': 0, 'message': '用户已经认领门户，请放弃当前门户后再次申请'})
         cache_set_after_create('form', 'form', new_claim.id, new_claim.to_dic())  # 将刚刚生成的表单放在redis中
         user_dic["is_professional"] = 0  # 表示正在申请
         user_dic["open_alex_id"] = author_id
