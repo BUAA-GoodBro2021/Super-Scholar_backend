@@ -77,3 +77,8 @@ def celery_re_upload_pdf(model_id, user_id, url, author_id, pdf_name):
     this_work.send_time = now()
     this_work.save()
     print("celery_re_upload_pdf")
+@app.task
+def celery_delete_work_pdf(model_id):
+    this_work = Work.objects.get(id=model_id)
+    this_work.delete()
+    print("celery_delete_work_pdf")

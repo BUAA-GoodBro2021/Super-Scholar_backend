@@ -201,3 +201,49 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
             cache.set(work_key, work_dic)
             celery_recover_work_pdf.delay(work_id)
     return JsonResponse({"result": 1, "message": '处理成功'})
+
+
+@login_checker
+def user_give_up_upload_pdf(request):
+    user_id = request.user_id
+    data_json = json.loads(request.body.decode())
+    print(data_json)
+    work_id = data_json.get('work_id')
+    author_id = data_json.get('author_id')
+    try:
+        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+    except:
+        return JsonResponse({"result": 0, "message": '用户不存在'})
+
+    try:
+        work_key, work_dic = cache_get_by_id('work', 'work', work_id)
+    except:
+        return JsonResponse({"result": 0, "message": '作品暂未上传pdf'})
+    if work_dic['user_id'] != user_id:
+        return JsonResponse({"result": 0, "message": '您不是上传此pdf的用户，删除此pdf请联系管理员'})
+    has_pdf = work_dic['has_pdf']
+    if has_pdf == 1:
+        cache.delete(work_key)
+        celery_delete_work_pdf.delay(work_id)
+    elif work_dic['has_pdf'] == 0:
+        upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'uploadworkpdfformlist', 1)
+        upload_pdf_form_id_list = upload_pdf_form_list_dic['id_list']
+        upload_pdf_form_id_list.remove(work_id)
+        upload_pdf_form_list_dic['id_list'] = upload_pdf_form_id_list
+        cache.set(upload_pdf_form_list_key, upload_pdf_form_list_dic)
+        if work_dic['last_has_pdf'] == 1:
+            work_dic['user_id'] = work_dic['last_user_id']
+            work_dic['author_id'] = work_dic['last_author_id']
+            work_dic['pdf'] = work_dic['last_pdf']
+            work_dic['url'] = work_dic['last_url']
+            work_dic['has_pdf'] = work_dic['last_has_pdf']
+            work_dic['send_time'] = work_dic['last_send_time']
+            cache.set(work_key, work_dic)
+            celery_recover_work_pdf.delay(work_id)
+        else:
+            cache.delete(work_key)
+            celery_delete_work_pdf.delay(work_id)
+    if has_pdf == 1:
+        return JsonResponse({"result": 1, "message": '删除pdf成功'})
+    else:
+        return JsonResponse({"result": 1, "message": '取消上传pdf成功'})
