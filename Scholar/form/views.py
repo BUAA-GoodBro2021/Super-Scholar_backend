@@ -47,7 +47,10 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
         data_json = json.loads(request.body.decode())
         print(data_json)
         user_id = request.user_id
-        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+        try:
+            user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+        except:
+            return JsonResponse({'result': 0, 'message': '当前用户不存在'})
         if user_dic["is_professional"] == -1:
             return JsonResponse({'result': 0, 'message': '当前用户暂无申请或无门户'})
 
@@ -104,7 +107,10 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
         data_json = json.loads(request.body.decode())
         print(data_json)
         user_id = request.user_id
-        super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
+        try:
+            super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
+        except:
+            return JsonResponse({'result': 0, 'message': '当前用户不存在'})
         if not super_user_dic['is_super']:
             return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
         deal_result = int(data_json.get('deal_result', 2))
@@ -119,7 +125,10 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
         cache.delete('form:' + 'form:' + str(user_id))
         celery_del_form.delay(user_id)
 
-        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+        try:
+            user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+        except:
+            return JsonResponse({'result': 0, 'message': '该申请用户不存在'})
         if deal_result == 1:
             user_dic["is_professional"] = 1
         else:
