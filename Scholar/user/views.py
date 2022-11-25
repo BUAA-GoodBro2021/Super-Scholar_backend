@@ -1,3 +1,4 @@
+from diophila import OpenAlex
 from django.core.cache import cache
 from user.models import *
 from django.http import HttpResponse
@@ -211,3 +212,42 @@ def get_user(request):
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
+
+
+# # 返回当前用户信息
+# @login_checker
+# def get_works(request):
+#     if request.method == 'POST':
+#
+#         # 获取表单信息
+#         data_json = json.loads(request.body.decode())
+#         # 获取到需要查询的页数以及每页多少个
+#         pages = data_json.get('pages', '')
+#         per_page = data_json.get('per_page', '')
+#
+#         # 获取用户id
+#         user_id = request.user_id
+#         # 获取信息
+#         user_key, user_dict = cache_get_by_id('user', 'user', user_id)
+#
+#         # 获取到作者的 open_alex_id
+#         is_professional = user_dict['is_professional']
+#         open_alex_id = user_dict['open_alex_id']
+#
+#         # 判断是否为已经认领门户的用户
+#         if is_professional != 1:
+#             result = {'result': 0, 'message': r"您暂时没有认领门户或者正在申请门户，请成功认领门户之后再尝试！"}
+#             return JsonResponse(result)
+#
+#         # 通过open_alex_id获取到其文章列表
+#         open_alex = OpenAlex("zhouenshen@buaa.edu.cn")
+#         user_work_list = list(
+#             open_alex.get_list_of_works(filters={"author.id": open_alex_id}, pages=[pages, ], per_page=per_page))
+#
+#
+#         for every_user_work in user_work_list:
+#             if every_user_work['open_access'].get('oa_url', '')
+#
+#     else:
+#         result = {'result': 0, 'message': r"请求方式错误！"}
+#         return JsonResponse(result)

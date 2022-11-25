@@ -2,9 +2,7 @@ from form.tasks import *
 from form.models import *
 from utils.Redis_utils import *
 from utils.Sending_utils import *
-# Create your views here.
 from django.core.cache import cache
-from author.models import *
 
 open_alex = OpenAlex("853048903@qq.com")
 
@@ -131,9 +129,9 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             return JsonResponse({'result': 0, 'message': '该申请用户不存在'})
         if deal_result == 1:
             user_dic["is_professional"] = 1
-            form_key,form_dic = cache_get_by_id('form','form',user_id)
+            form_key, form_dic = cache_get_by_id('form', 'form', user_id)
             author_id = form_dic["author_id"]
-            # user_dic['work_count'] =
+            user_dic['work_count'] = open_alex.get_single_author(author_id)['works_count']
         else:
             user_dic["is_professional"] = -1
             user_dic["open_alex_id"] = None
@@ -163,7 +161,6 @@ def manager_look_all_user(request):
             continue
         user_dic_list.append(user_dic)
     return JsonResponse({'result': 1, 'message': '获得所有用户成功', 'user_list': user_dic_list})
-
 
 # @login_checker
 # def manager_delete_user_author(request):
