@@ -4,6 +4,16 @@ from collection.models import CollectionPackage
 from follow.models import Follow
 
 
+class UserList(models.Model):
+    id_list = models.TextField('用户的id的列表', max_length=1024, default='[]')
+
+    def to_dic(self):
+        return {
+            'id': self.id,
+            'id_list': eval(self.id_list)
+        }
+
+
 class User(models.Model):
     # 基础信息
     username = models.CharField('用户名', max_length=100, default='')
@@ -19,8 +29,9 @@ class User(models.Model):
     avatar = models.FileField('用户头像', upload_to='', default='')
 
     # 权限判断
-    is_professional = models.IntegerField('是否认证', default=-1)
+    is_professional = models.IntegerField('是否认证', default=-1)  # -1未认证，0正在申请，1已认证
     open_alex_id = models.CharField('对应的open_alex_id', max_length=200, db_index=True, default='', null=True)
+    work_count = models.IntegerField('作者作品数量', default=0)
     # 实体属性
     created_time = models.DateTimeField('创建时间', auto_now_add=True)
     updated_time = models.DateTimeField('更新时间', auto_now=True)
@@ -42,6 +53,7 @@ class User(models.Model):
             'is_active': self.is_active,
             'is_super': self.is_super,
             'is_professional': self.is_professional,
+            'work_count': self.work_count,
             'open_alex_id': self.open_alex_id,
             'created_time': self.created_time,
             'updated_time': self.updated_time,

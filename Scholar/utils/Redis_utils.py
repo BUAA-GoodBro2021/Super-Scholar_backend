@@ -15,31 +15,6 @@ from django.core.cache import cache
 from properties import open_alex_mailto_email
 
 
-# def cache_get_form_by_type(app_label, model_name, model_type):
-#     """
-#         :param app_label:   APP名
-#         :param model_name:  类名
-#         :param model_type:  申请处理情况
-#         :return:            缓存键和信息字典
-#     """
-#     # 加载所有类
-#     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Scholar.settings')
-#     django.setup()
-#     # 生成缓存键
-#     key = app_label + ":" + model_name + ":" + str(model_type)
-#     # 得到需要进行操作的类
-#     model = apps.get_model(app_label=app_label, model_name=model_name)
-#     # 获取缓存
-#     model_dict = cache.get(key)
-#     if model_dict is None:
-#         model_dict = {"form_id_list": []}
-#         model_array = list(model.objects.filter(is_pass=0))
-#         for i in range(len(model_array)):
-#             model_dict["form_id_list"].append(model_array[i].id)
-#         cache.set(key, model_dict)
-#         return key, model_dict
-
-
 def cache_set_after_create(app_label, model_name, model_id, model_dict):
     """
         :param app_label:   APP名
