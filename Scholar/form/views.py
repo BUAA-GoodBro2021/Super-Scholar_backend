@@ -48,9 +48,7 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
         user_key, user_dic = cache_get_by_id('user', 'User', user_id)
         if user_dic["is_professional"] == -1:
             return JsonResponse({'result': 0, 'message': '当前用户暂无申请或无门户'})
-        user_dic["is_professional"] = -1
-        user_dic["open_alex_id"] = None
-        cache.set(user_key, user_dic)
+
         if user_dic["is_professional"] == 0:
             cache.delete('form:Form:' + str(user_id))
             celery_del_form.delay(user_id)
@@ -61,6 +59,11 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
             form_handling_dic["Form_id_list"] = form_handling_id_list
             cache.set(form_handling_key, form_handling_dic)
             celery_remove_form_list.delay(0, user_id)
+
+        user_dic["is_professional"] = -1
+        user_dic["open_alex_id"] = None
+        cache.set(user_key, user_dic)
+        celery_change_user_pass.delay(-1, user_id)
         return JsonResponse({'result': 1, 'message': '放弃成功'})
 
 

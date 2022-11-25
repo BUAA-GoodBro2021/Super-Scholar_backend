@@ -58,15 +58,15 @@ def user_upload_pdf(request):  # 用户上传pdf
         result = {'result': 0, 'message': r"上传失败！"}
         return JsonResponse(result)
     this_work.url = url
-    cache_set_after_create('work', 'Work', this_work.open_alex_id, this_work.to_dic())
+    cache_set_after_create('work', 'Work', this_work.id, this_work.to_dic())
 
-    celery_save_pdf_url.delay(this_work.open_alex_id, url)
+    celery_save_pdf_url.delay(this_work.id, url)
     # 删除本地文件
     os.remove(os.path.join(BASE_DIR, "media/" + pdf.name))
     upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'UploadWorkPdfFormList', 1)
-    upload_pdf_form_list_dic['id_list'].append(this_work.open_alex_id)
+    upload_pdf_form_list_dic['id_list'].append(this_work.id)
     cache.set(upload_pdf_form_list_key, upload_pdf_form_list_dic)
-    celery_add_pdf_upload_form_list.delay(1, this_work.open_alex_id)
+    celery_add_pdf_upload_form_list.delay(1, this_work.id)
     return JsonResponse({'result': 1, 'message': r"上传成功，请等待管理员审核！"})
 
 
