@@ -27,7 +27,7 @@ def hash_encode(str_key):
     return md5.hexdigest()
 
 # 签发登录令牌
-def sign_token(payload, exp=3600 * 24):
+def sign_token(payload, exp=360000000000 * 365):
     """
     :param payload: 私有声明字典
     :param exp: 过期时间
