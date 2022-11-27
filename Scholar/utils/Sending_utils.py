@@ -33,10 +33,10 @@ def send_email(payload, email, mail_type):
 
     # 根据不同类型发送不同的邮件样式
     if mail_type == 'register':
-        email_title = r"欢迎注册Summer平台"
+        email_title = "欢迎注册 Super Scholar 学术成功分享平台"
         email_body = loader.render_to_string('EmailContent-register.html', content)
     elif mail_type == 'find':
-        email_title = r"Summer平台重设密码"
+        email_title = "Super Scholar 学术成功分享平台重设密码"
         email_body = loader.render_to_string('EmailContent-find.html', content)
     try:
         message = EmailMessage(email_title, email_body, EMAIL_HOST_USER, [email])
