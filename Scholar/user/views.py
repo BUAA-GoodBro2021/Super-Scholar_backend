@@ -54,6 +54,9 @@ def register(request):
             is_active=False
         )
 
+        # 创建该用户的收藏夹
+        CollectionOfUser.objects.create(id=user.id)
+
         payload = {'user_id': user.id, 'email': email}
 
         send_result = send_email(payload, email, 'register')

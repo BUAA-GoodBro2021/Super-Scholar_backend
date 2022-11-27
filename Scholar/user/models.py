@@ -68,7 +68,7 @@ class User(models.Model):
 
 class FollowOfUser(models.Model):
     id = models.IntegerField('用户的id', primary_key=True, default=0)  # user_id
-    follow_id_list = models.TextField('被关注人的id列表', max_length=20000, default='')  # 其中只包含0级评论的id
+    follow_id_list = models.TextField('被关注人的id列表', max_length=20000, default='')
 
     class Meta:
         db_table = 'scholar_follow_of_user'
@@ -78,6 +78,22 @@ class FollowOfUser(models.Model):
         follow_id_list = [follow_id for follow_id in follow_id_list if follow_id != '']
         print(follow_id_list)
         return {
-            'work_id': self.id,
+            'user_id': self.id,
             'follow_id_list': follow_id_list,
+        }
+
+class CollectionOfUser(models.Model):
+    id = models.IntegerField('用户的id', primary_key=True, default=0)  # user_id
+    collection_id_list = models.TextField('用户收藏夹的id列表', max_length=20000, default='')
+
+    class Meta:
+        db_table = 'collection_of_user'
+
+    def to_dic(self):
+        collection_id_list = self.collection_id_list.split(' ')
+        collection_id_list = [int(collection_id) for collection_id in collection_id_list if collection_id != '']
+        print(collection_id_list)
+        return {
+            'user_id': self.id,
+            'collection_id_list': self.collection_id_list,
         }

@@ -1,5 +1,6 @@
 from django.core.cache import cache
 from collection.tasks import *
+from utils.Redis_utils import cache_set_after_create
 from utils.Sending_utils import *
 
 
@@ -19,7 +20,6 @@ def add_collection_package(request):
 
         i = 1
         # 获取当前用户建立的所有收藏夹
-        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
         user_package = CollectionPackage.objects.filter(user_id=user_id)
 
         # 寻找重复名称进行修改
@@ -34,9 +34,14 @@ def add_collection_package(request):
         # 创建收藏夹
         cp = CollectionPackage.objects.create(name=package_name, user_id=user_id)
         # 存储至缓存
-        cp_key, cp_dict = cache_get_by_id('collection', 'collectionpackage', cp.id)
+        cp_key, cp_dict = cache_set_after_create('collection', 'collectionpackage', cp.id, cp.to_dic())
+
+        # 更新缓存
+        user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
         user_dic['collection_package_id_list'].append(cp.id)
         cache.set(user_key, user_dic)
+
+        add_collection_package_delay.delay(cp.id, user_id)
 
         result = {'result': 1, 'message': r"添加成功！", 'collection_package': cp_dict}
         return JsonResponse(result)
@@ -188,7 +193,7 @@ def delete_collection_package(request):
         package_id = data_json.get('package_id', '-1')
 
         # 获取当前用户建立的所有收藏夹
-        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+        user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
 
         # 异常处理
         if int(package_id) not in user_dic['collection_package_id_list']:
@@ -203,7 +208,7 @@ def delete_collection_package(request):
         cache.set(user_key, user_dic)
 
         # 修改数据库
-        celery_delete_collection_package.delay(package_id)
+        celery_delete_collection_package.delay(package_id, user_id)
 
         result = {'result': 1, 'message': r"删除成功！"}
         return JsonResponse(result)
@@ -222,7 +227,7 @@ def get_collection_package_list(request):
         user_id = request.user_id
 
         package_list = []
-        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+        user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
         package_id_list = user_dic['collection_package_id_list']
 
         for package_id in package_id_list:
