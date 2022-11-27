@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.utils.timezone import now
 
 from Scholar.settings import BASE_DIR
+from message.models import Message
 from search.views import get_open_alex_data_num
 from utils.Bucket_utils import Bucket
 from utils.Login_utils import login_checker
@@ -181,8 +182,15 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
     upload_pdf_form_list_dic['id_list'] = upload_pdf_form_id_list
     cache.set(upload_pdf_form_list_key, upload_pdf_form_list_dic)
 
-    celery_remove_pdf_upload_form_list(1, work_id)
-
+    celery_remove_pdf_upload_form_list.delay(1, work_id)
+    try:
+        user_key, user_dic = cache_get_by_id('user', 'user', work_dic['user_id'])
+    except:
+        return JsonResponse({'result': 0, 'message': '上传论文的用户不存在'})
+    user_dic['unread_message_count'] = user_dic['unread_message_count']+1
+    print(user_dic)
+    cache.set(user_key, user_dic)
+    celery_user_add_unread_message_count.delay(work_dic['user_id'])
     # 说明上传PDF正确
     if deal_result == 1:
         work_dic['has_pdf'] = 1
@@ -221,11 +229,26 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
             cache.set(recommended_work_list_by_cited_count_key, recommended_work_list_by_cited_count)
             cache.set(recommended_work_list_by_publication_date_key, recommended_work_list_by_publication_date)
             cache.set("open_alex_num", get_open_alex_data)
-
+        this_message = Message.objects.create(send_id=0, receiver_id=work_dic['user_id'], message_type=3,
+                                              work_open_alex_id=work_dic['id'], work_name=work_dic['work_name'],
+                                              pdf=work_dic['pdf'], url=work_dic['url'])
+        cache_set_after_create('message', 'message', this_message.id, this_message.to_dic())
+        message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', work_dic['user_id'])
+        message_id_list_dic['message_id_list'].append(this_message.id)
+        cache.set(message_id_list_key, message_id_list_dic)
+        celery_add_user_message_id_list.delay(work_dic['user_id'], this_message.id)
         cache.set(work_key, work_dic)
-        celery_change_pdf_upload_form_has(work_id)
+        celery_change_pdf_upload_form_has.delay(work_id)
 
     elif deal_result == -1:
+        this_message = Message.objects.create(send_id=0, receiver_id=work_dic['user_id'], message_type=2,
+                                              work_open_alex_id=work_dic['id'], work_name=work_dic['work_name'],
+                                              pdf=work_dic['pdf'], url=work_dic['url'])
+        cache_set_after_create('message', 'message', this_message.id, this_message.to_dic())
+        message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', work_dic['user_id'])
+        message_id_list_dic['message_id_list'].append(this_message.id)
+        cache.set(message_id_list_key, message_id_list_dic)
+        celery_add_user_message_id_list.delay(work_dic['user_id'], this_message.id)
         if work_dic['last_has_pdf'] == -1:
             cache.delete(work_key)
             celery_delete_pdf_upload_form.delay(work_id)

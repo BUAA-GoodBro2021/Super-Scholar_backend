@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.utils.timezone import now
 
-from form.tasks import *
+from .tasks import *
 from form.models import *
 from utils.Redis_utils import *
 from utils.Sending_utils import *
@@ -16,6 +16,10 @@ def look_message_list(request):
     print(data_json)
     user_id = request.user_id
     message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
+    user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+    user_dic['unread_message_count'] = 0
+    cache.set(user_key, user_dic)
+    celery_zero_user_unread_message_count.delay(user_id)
     message_list = []
     for message_id in message_id_list_dic["message_id_list"]:
         message_key, message_dic = cache_get_by_id('message', 'message', message_id)

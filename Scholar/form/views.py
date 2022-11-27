@@ -40,9 +40,9 @@ def user_claim_author(request):  # 用户申请认领门户
         cache_set_after_create('form', 'form', new_claim.id, new_claim.to_dic())  # 将刚刚生成的表单放在redis中
         user_dic["is_professional"] = 0  # 表示正在申请
         user_dic["open_alex_id"] = author_id
-        user_dic["real_name"]=real_name
+        user_dic["real_name"] = real_name
         cache.set(user_key, user_dic)
-        celery_claim_author.delay(author_id, user_id,real_name)
+        celery_claim_author.delay(author_id, user_id, real_name)
         form_handling_dic["Form_id_list"].append(new_claim.id)  # 拓展redis中的正在申请列表
         cache.set(form_handling_key, form_handling_dic)  # 把更新后的未处理申请id列表保存在redis中
         celery_add_form_list.delay(0, new_claim.id)  # 数据库修改
@@ -150,6 +150,7 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             this_message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=1,
                                                   author_id=form_dic['author_id'], real_name=form_dic['real_name'],
                                                   institution=form_dic['institution'])
+            cache_set_after_create('message', 'message', this_message.id, this_message.to_dic())
             message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
             message_id_list_dic['message_id_list'].append(this_message.id)
             cache.set(message_id_list_key, message_id_list_dic)
@@ -157,11 +158,12 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
         else:
             user_dic["is_professional"] = -1
             user_dic["open_alex_id"] = None
-            user_dic['real_name']=None
+            user_dic['real_name'] = None
             user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
             this_message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=0,
                                                   author_id=form_dic['author_id'], real_name=form_dic['real_name'],
                                                   institution=form_dic['institution'])
+            cache_set_after_create('message', 'message', this_message.id, this_message.to_dic())
             message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
             message_id_list_dic['message_id_list'].append(this_message.id)
             cache.set(message_id_list_key, message_id_list_dic)
@@ -211,7 +213,7 @@ def manager_delete_user_author(request):
         return JsonResponse({'result': 0, 'message': '此用户没有门户或正在申请，无法解除'})
     else:
 
-        user_dic['unread_message_count'] = user_dic['unread_message_count']+1
+        user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
         this_message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=-1,
                                               author_id=user_dic['open_alex_id'], real_name=user_dic['real_name'])
         user_dic['is_professional'] = -1

@@ -94,6 +94,6 @@ def celery_add_user_message_id_list(user_id, message_id):
     user_message_list = UserMessageIdList.objects.get(id=user_id)
     message_id_list = eval(user_message_list.message_id_list)
     message_id_list.append(message_id)
-    user_message_list.message_id_list = str(user_message_list)
+    user_message_list.message_id_list = str(message_id_list)
     user_message_list.save()
     print('celery_add_user_message_id_list')
