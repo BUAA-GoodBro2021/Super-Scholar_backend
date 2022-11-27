@@ -87,7 +87,7 @@ class CollectionOfUser(models.Model):
     collection_id_list = models.TextField('用户收藏夹的id列表', max_length=20000, default='')
 
     class Meta:
-        db_table = 'collection_of_user'
+        db_table = 'scholar_collection_of_user'
 
     def to_dic(self):
         collection_id_list = self.collection_id_list.split(' ')
