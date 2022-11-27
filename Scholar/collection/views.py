@@ -196,7 +196,7 @@ def delete_collection_package(request):
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
 
         # 异常处理
-        if int(package_id) not in user_dic['collection_package_id_list']:
+        if int(package_id) not in user_dic['collection_id_list']:
             result = {'result': 0, 'message': r"文件夹已删除！"}
             return JsonResponse(result)
 
