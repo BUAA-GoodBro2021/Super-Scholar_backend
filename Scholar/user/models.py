@@ -95,5 +95,5 @@ class CollectionOfUser(models.Model):
         print(collection_id_list)
         return {
             'user_id': self.id,
-            'collection_id_list': self.collection_id_list,
+            'collection_id_list': collection_id_list,
         }

@@ -195,6 +195,7 @@ def delete_collection_package(request):
         # 获取当前用户建立的所有收藏夹
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
 
+        print(user_dic['collection_id_list'])
         # 异常处理
         if int(package_id) not in user_dic['collection_id_list']:
             result = {'result': 0, 'message': r"文件夹已删除！"}
@@ -204,7 +205,7 @@ def delete_collection_package(request):
         # 修改缓存
         cache.delete(package_key)
 
-        user_dic['collection_package_id_list'].remove(int(package_id))
+        user_dic['collection_id_list'].remove(int(package_id))
         cache.set(user_key, user_dic)
 
         # 修改数据库
