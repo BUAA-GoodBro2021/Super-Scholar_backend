@@ -27,7 +27,7 @@ def look_message_list(request):
     message_list.reverse()
     return JsonResponse({'result': 1, 'message': '获得用户消息列表成功', 'message_list': message_list})
 
-
+@login_checker
 def delete_message(request):
     data_json = json.loads(request.body.decode())
     print(data_json)
