@@ -16,6 +16,9 @@ class Form(models.Model):
     id = models.IntegerField('用户id', primary_key=True)
     content = models.TextField('申请的内容', max_length=1024, default='')
     author_id = models.CharField('对应的open_alex_id', max_length=200, default='')
+    institution = models.CharField('机构名称', max_length=200, default='')
+    real_name = models.CharField('真名', max_length=200, default='')
+    claim_time = models.DateTimeField(null=True)
     is_pass = models.IntegerField('是否通过', default=0)  # 0表示正在审批，1表示申请通过，2表示申请拒绝
 
     def to_dic(self):
@@ -23,7 +26,10 @@ class Form(models.Model):
             'user_id': self.id,
             'content': self.content,
             'author_id': self.author_id,
+            'institution': self.institution,
+            'real_name': self.real_name,
             'is_pass': self.is_pass,
+            'claim_time': self.claim_time,
         }
 
     class Meta:
