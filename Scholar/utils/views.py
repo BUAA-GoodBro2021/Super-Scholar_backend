@@ -11,6 +11,7 @@ def clear_redis_all(request):
     cache.clear()
     return HttpResponse("OK")
 
+
 # 通过邮箱激活用户
 def active(request, token):
     """

@@ -10,6 +10,7 @@ from django.template import loader
 from properties import *
 from utils.Login_utils import *
 
+
 # 发送真实邮件
 def send_email(payload, email, mail_type):
     """

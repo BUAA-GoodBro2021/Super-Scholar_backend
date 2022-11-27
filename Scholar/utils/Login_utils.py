@@ -2,7 +2,6 @@
 登录检测相关工具类
 """
 import hashlib
-import json
 import time
 import jwt
 from django.http import JsonResponse
@@ -26,6 +25,7 @@ def hash_encode(str_key):
     # 完成加密
     return md5.hexdigest()
 
+
 # 签发登录令牌
 def sign_token(payload, exp=360000000000 * 365):
     """
@@ -38,6 +38,7 @@ def sign_token(payload, exp=360000000000 * 365):
     # 使用 HS256 算法配合密钥签发登录令牌
     token = jwt.encode(payload, TOKEN_SECRET_KEY, algorithm='HS256')
     return token
+
 
 # 校验登录令牌
 def check_token(token):
@@ -54,6 +55,7 @@ def check_token(token):
         return None
     # 如果成功返回1
     return payload
+
 
 def login_checker(func):
     """
@@ -130,4 +132,3 @@ def login_body_checker(func):
         return func(request, *args, **kwargs)
 
     return wrap
-
