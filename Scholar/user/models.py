@@ -36,6 +36,9 @@ class User(models.Model):
     created_time = models.DateTimeField('创建时间', auto_now_add=True)
     updated_time = models.DateTimeField('更新时间', auto_now=True)
 
+    # 未读消息个数
+    unread_message_count = models.IntegerField('未读消息个数', default=0)
+
     class Meta:
         db_table = 'scholar_user'
 
@@ -59,6 +62,7 @@ class User(models.Model):
             'updated_time': self.updated_time,
 
             'collection_package_id_list': collection_package_id_list,
+            'unread_message_count': self.unread_message_count,
         }
 
 
