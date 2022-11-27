@@ -1,6 +1,5 @@
 from django.core.cache import cache
 from collection.tasks import *
-
 from utils.Sending_utils import *
 
 

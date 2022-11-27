@@ -4,10 +4,9 @@
 import hashlib
 import time
 import jwt
+import json
 from django.http import JsonResponse
-
 from properties import TOKEN_SECRET_KEY
-
 # Hash-md5 加密字符串
 from utils.Redis_utils import cache_get_by_id
 
