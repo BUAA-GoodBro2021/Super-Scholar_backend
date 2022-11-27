@@ -217,6 +217,14 @@ def cache_get_single_by_diophila(request_body_json):
             value = open_alex.get_single_work(work_id)
             # 根据倒排索引获得摘要
             value['abstract'] = get_work_abstract(value['abstract_inverted_index'])
+            # 获取原文信息
+            try:
+                # 说明上传了PDF,且该PDF没有删除
+                work_key, work_dic = cache_get_by_id('work', 'work', value['id'].split('/')[-1])
+                value['open_access']['is_oa'] = True
+                value['open_access']['oa_url'] = work_dic['url']
+            except:
+                pass
         elif request_body_json['entity_type'] == 'authors':
             # 获取作者 ID
             author_id = request_body_json['params']['id']
