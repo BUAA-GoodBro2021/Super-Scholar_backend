@@ -34,16 +34,16 @@ def add_collection_package(request):
         # 创建收藏夹
         cp = CollectionPackage.objects.create(name=package_name, user_id=user_id)
         # 存储至缓存
-        cp_key, cp_dict = cache_set_after_create('collection', 'collectionpackage', cp.id, cp.to_dic())
+        cache_set_after_create('collection', 'collectionpackage', cp.id, cp.to_dic())
 
         # 更新缓存
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
-        user_dic['collection_package_id_list'].append(cp.id)
+        user_dic['collection_id_list'].append(cp.id)
         cache.set(user_key, user_dic)
 
         add_collection_package_delay.delay(cp.id, user_id)
 
-        result = {'result': 1, 'message': r"添加成功！", 'collection_package': cp_dict}
+        result = {'result': 1, 'message': r"添加成功！", 'collection_package': cp.to_dic()}
         return JsonResponse(result)
 
     else:
