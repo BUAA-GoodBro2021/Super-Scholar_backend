@@ -190,22 +190,22 @@ def delete_collection_package(request):
         # 获取表单信息
         data_json = json.loads(request.body.decode())
         user_id = request.user_id
-        package_id = data_json.get('package_id', '-1')
+        package_id = int(data_json.get('package_id', '-1'))
 
         # 获取当前用户建立的所有收藏夹
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
 
         print(user_dic['collection_id_list'])
         # 异常处理
-        if int(package_id) not in user_dic['collection_id_list']:
+        if package_id not in user_dic['collection_id_list']:
             result = {'result': 0, 'message': r"文件夹已删除！"}
             return JsonResponse(result)
 
-        package_key = 'collection:collection_package:' + package_id
+        package_key = 'collection:collection_package:' + str(package_id)
         # 修改缓存
         cache.delete(package_key)
 
-        user_dic['collection_id_list'].remove(int(package_id))
+        user_dic['collection_id_list'].remove(package_id)
         cache.set(user_key, user_dic)
 
         # 修改数据库
