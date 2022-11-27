@@ -93,7 +93,7 @@ def associate_content_view(request):
 def get_single_data_view(request):
     if request.method == 'GET':
         # 获取请求体
-        request_body_json = json.loads(request.body)
+        request_body_json = json.loads(request.body.decode())
 
         if request_body_json['entity_type'] == 'works':
             # 获取主体
