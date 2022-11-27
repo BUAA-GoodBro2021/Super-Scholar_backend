@@ -44,3 +44,13 @@ def delete_message(request):
     cache.delete('message:' + 'message:' + str(message_id))
     celery_delete_message.delay(message_id)
     return JsonResponse({'result': 1, 'message': '删除消息成功'})
+
+
+@login_checker
+def look_unread_message_count(request):
+    data_json = json.loads(request.body.decode())
+    print(data_json)
+    user_id = request.user_id
+    user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+    return JsonResponse(
+        {'result': 0, 'message': '获取未读消息个数成功', 'unread_message_count': user_dic['unread_message_count']})
