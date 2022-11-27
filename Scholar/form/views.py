@@ -1,3 +1,5 @@
+from django.utils.timezone import now
+
 from form.tasks import *
 from form.models import *
 from utils.Redis_utils import *
@@ -12,6 +14,8 @@ def user_claim_author(request):  # 用户申请认领门户
     if request.method == 'POST':
         data_json = json.loads(request.body.decode())
         print(data_json)
+        institution = data_json.get('institution', '机构')
+        real_name = data_json.get('real_name', '真名')
         content = data_json.get('content', '默认申请内容')
         user_id = request.user_id
         author_id = data_json.get('author_id', '')
@@ -28,7 +32,8 @@ def user_claim_author(request):  # 用户申请认领门户
             return JsonResponse({'result': 0, 'message': '用户已经认领门户，请放弃当前门户后再次申请'})
         form_handling_key, form_handling_dic = cache_get_by_id('form', 'formlist', 0)  # 从cache中获得正在处理的申请的id列表
         try:
-            new_claim = Form.objects.create(author_id=author_id, content=content, id=user_id)
+            new_claim = Form.objects.create(author_id=author_id, content=content, id=user_id, institution=institution,
+                                            real_name=real_name, claim_time=now())
         except:
             return JsonResponse({'result': 0, 'message': '用户已经认领门户，请放弃当前门户后再次申请'})
         cache_set_after_create('form', 'form', new_claim.id, new_claim.to_dic())  # 将刚刚生成的表单放在redis中
