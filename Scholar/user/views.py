@@ -106,7 +106,7 @@ def login(request):
         # 需要加密的信息
         payload = {'user_id': user.id}
         # 签发登录令牌
-        token = sign_token(payload, exp=3600 * 24)
+        token = sign_token(payload, exp=3600 * 24000000)
 
         # 获取缓存信息
         user_key, user_dict = cache_get_by_id('user', 'user', user.id)
@@ -214,7 +214,7 @@ def get_user(request):
         return JsonResponse(result)
 
 
-# # 返回当前用户信息
+# # 查看用户自己的门户信息
 # @login_checker
 # def get_works(request):
 #     if request.method == 'POST':
@@ -243,7 +243,6 @@ def get_user(request):
 #         open_alex = OpenAlex("zhouenshen@buaa.edu.cn")
 #         user_work_list = list(
 #             open_alex.get_list_of_works(filters={"author.id": open_alex_id}, pages=[pages, ], per_page=per_page))
-#
 #
 #         for every_user_work in user_work_list:
 #             if every_user_work['open_access'].get('oa_url', '')

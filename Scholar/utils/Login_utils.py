@@ -26,7 +26,7 @@ def hash_encode(str_key):
 
 
 # 签发登录令牌
-def sign_token(payload, exp=360000000000 * 365):
+def sign_token(payload, exp=3600 * 24):
     """
     :param payload: 私有声明字典
     :param exp: 过期时间
