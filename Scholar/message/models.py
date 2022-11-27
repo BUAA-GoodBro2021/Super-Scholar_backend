@@ -36,6 +36,7 @@ class Message(models.Model):
 
     def to_dic(self):
         return {
+            'id': self.id,
             'send_id': self.send_id,
             'message_type': self.message_type,
             # 0表示管理S员拒绝用户的申请门户，1表示管理员同意用户的申请门户，2表示管理员拒绝了用户的上传pdf申请，3表示管理员同意了用户的上传pdf申请,4表示评论消息
