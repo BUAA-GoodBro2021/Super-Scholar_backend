@@ -1,7 +1,4 @@
 import datetime
-
-from django.template.defaulttags import now
-
 from Scholar.celery import app
 from user.models import User
 
