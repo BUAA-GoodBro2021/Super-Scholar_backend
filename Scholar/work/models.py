@@ -2,8 +2,9 @@ from django.db import models
 
 
 class Work(models.Model):
-    user_id = models.IntegerField('上传pdf的用户id', null=True)
     id = models.CharField('对应作品的open_alex_id', primary_key=True, max_length=200, db_index=True, default='')
+    user_id = models.IntegerField('上传pdf的用户id', null=True)
+    work_name = models.CharField('论文的名字', max_length=200, db_index=True, default='')
     author_id = models.CharField('上传pdf的作者的open_alex_id', max_length=200, db_index=True, default='')
     url = models.CharField('论文的访问路由', max_length=200, null=True)
     pdf = models.FileField('文章pdf', upload_to='', default='')
@@ -19,6 +20,7 @@ class Work(models.Model):
     def to_dic(self):
         return {
             'id': self.id,
+            'work_name': self.work_name,
 
             'user_id': self.user_id,
             'author_id': self.author_id,

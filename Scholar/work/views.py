@@ -31,15 +31,15 @@ def user_upload_pdf(request):  # 用户上传pdf
     # 获取文件尾缀并
     # 修改名称
     suffix = '.' + (pdf.name.split("."))[-1]
-
     work_id = request.POST.get('work_id', '')
-    # user_id = request.POST.get('user_id', "")
+    work_name = request.POST.get('work_name', "")
     author_id = request.POST.get('author_id', '')
     # 先生成一个随机 Key 保存在桶中进行审核
     key = create_code()
     pdf.name = str(work_id) + key + suffix
     try:
-        this_work = Work.objects.create(id=work_id, author_id=author_id, pdf=pdf, has_pdf=0, user_id=user_id,
+        this_work = Work.objects.create(id=work_id, author_id=author_id, work_name=work_name, pdf=pdf, has_pdf=0,
+                                        user_id=user_id,
                                         send_time=now())
     except:
         return JsonResponse({'result': 0, 'message': r"当前论文已有pdf或正在审核，请刷新页面！"})
