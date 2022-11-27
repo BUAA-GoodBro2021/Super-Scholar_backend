@@ -30,7 +30,7 @@ def get_open_alex_data_num():
 
 # 获取主页信息
 def get_index_data_view(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         # 获取引用量前25的论文
         request_body_json = {
             "entity_type": "works",
@@ -73,7 +73,7 @@ def get_index_data_view(request):
 
 # 联想用户搜索的内容
 def associate_content_view(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         # 获取请求体
         request_body_json = json.loads(request.body.decode())
 
@@ -91,7 +91,7 @@ def associate_content_view(request):
 
 # 用户查看具体单个实体
 def get_single_data_view(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         # 获取请求体
         request_body_json = json.loads(request.body.decode())
 
@@ -125,7 +125,7 @@ def get_single_data_view(request):
 
 # 用户筛选实体
 def get_list_of_data_view(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         # 获取请求体
         request_body_json = json.loads(request.body.decode())
 
@@ -159,7 +159,7 @@ def get_list_of_data_view(request):
 
 # 用户对筛选论文进行分组
 def get_groups_of_data_view(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         # 获取请求体
         request_body_json = json.loads(request.body.decode())
         if request_body_json['entity_type'] == 'works':
