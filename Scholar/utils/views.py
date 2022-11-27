@@ -5,6 +5,7 @@ from properties import *
 from utils.tasks import *
 from utils.Login_utils import *
 from utils.Redis_utils import *
+from message.models import *
 
 
 def clear_redis_all(request):
@@ -64,6 +65,7 @@ def active(request, token):
         # 返回注册成功的界面
         content["title"] = "感谢注册"
         content["message"] = "注册Summer平台成功！"
+        UserMessageIdList.objects.create(id=user_id, message_id_list='[]')
         return render(request, 'EmailContent-check.html', content)
 
     # 重设密码

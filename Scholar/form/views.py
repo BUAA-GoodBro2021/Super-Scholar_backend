@@ -5,7 +5,7 @@ from form.models import *
 from utils.Redis_utils import *
 from utils.Sending_utils import *
 from django.core.cache import cache
-
+from message.models import *
 open_alex = OpenAlex("853048903@qq.com")
 
 
@@ -148,7 +148,7 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             user_dic["open_alex_id"] = None
         cache.set(user_key, user_dic)
         celery_change_user_pass.delay(deal_result, user_id)
-
+        this_message = Message.objects.create(send_id=0,receiver_id=user_id)
         return JsonResponse({'result': 1, 'message': '处理成功'})
 
 
