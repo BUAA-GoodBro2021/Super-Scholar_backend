@@ -228,7 +228,7 @@ def get_collection_package_list(request):
 
         package_list = []
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
-        package_id_list = user_dic['collection_package_id_list']
+        package_id_list = user_dic['collection_id_list']
 
         for package_id in package_id_list:
             package_key, package_dic = cache_get_by_id('collection', 'collectionpackage', package_id)
