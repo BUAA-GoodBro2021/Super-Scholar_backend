@@ -71,6 +71,10 @@ def active(request, token):
             return JsonResponse({'result': 0, 'message': '不能重复点击哦'})
         cache_set_after_create('message', 'usermessageidlist', this_UserMessageIdList.id,
                                this_UserMessageIdList.to_dic())
+        user_id_list_key, user_id_list_dic = cache_get_by_id('user', 'userlist', 0)
+        user_id_list_dic['id_list'].append(int(user_id))
+        cache.set(user_id_list_key, user_id_list_dic)
+        celery_add_user_id.delay(int(user_id))
         return render(request, 'EmailContent-check.html', content)
 
     # 重设密码

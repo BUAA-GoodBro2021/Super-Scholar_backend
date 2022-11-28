@@ -64,10 +64,7 @@ def register(request):
             result = {'result': 0, 'message': r'发送失败!请检查邮箱格式'}
             return JsonResponse(result)
         else:
-            user_id_list_key, user_id_list_dic = cache_get_by_id('user', 'userlist', 0)
-            user_id_list_dic['id_list'].append(user.id)
-            cache.set(user_id_list_key, user_id_list_dic)
-            celery_add_user_id.delay(user.id)
+
             result = {'result': 1, 'message': r'发送成功!请及时在邮箱中查收.'}
             return JsonResponse(result)
     else:
