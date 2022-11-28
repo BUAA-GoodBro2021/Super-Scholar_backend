@@ -1,4 +1,5 @@
 from Scholar.celery import app
+from author.models import Author
 from form.models import *
 from user.models import *
 from message.models import *
@@ -113,3 +114,10 @@ def celery_add_user_message_id_list(user_id, message_id):
     user_message_list.message_id_list = str(message_id_list)
     user_message_list.save()
     print('celery_add_user_message_id_list')
+
+
+@app.task()
+def celery_delete_author(author_id):
+    this_author = Author.objects.get(id=author_id)
+    this_author.delete()
+    print('celery_delete_author')

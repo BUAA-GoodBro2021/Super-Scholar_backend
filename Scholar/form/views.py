@@ -6,6 +6,7 @@ from utils.Redis_utils import *
 from utils.Sending_utils import *
 from django.core.cache import cache
 from message.models import *
+from author.models import *
 
 open_alex = OpenAlex("853048903@qq.com")
 
@@ -37,6 +38,13 @@ def user_claim_author(request):  # 用户申请认领门户
                                             real_name=real_name, claim_time=now())
         except:
             return JsonResponse({'result': 0, 'message': '用户已经认领门户，请放弃当前门户后再次申请'})
+        flag = 0
+        try:
+            cache_get_by_id('author', 'author', author_id)
+        except:
+            flag = 1
+        if flag == 0:
+            return JsonResponse({'result': 0, 'message': '这个作者已经被认领门户'})
         cache_set_after_create('form', 'form', new_claim.id, new_claim.to_dic())  # 将刚刚生成的表单放在redis中
         user_dic["is_professional"] = 0  # 表示正在申请
         user_dic["open_alex_id"] = author_id
@@ -72,14 +80,15 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
             form_handling_dic["Form_id_list"] = form_handling_id_list
             cache.set(form_handling_key, form_handling_dic)
             celery_remove_form_list.delay(0, user_id)
-
+        if user_dic["is_professional"] == 1:
+            cache.delete('author:' + 'author:' + user_dic["open_alex_id"])
+            celery_delete_author.delay(user_dic["open_alex_id"])
         user_dic["is_professional"] = -1
         user_dic["open_alex_id"] = None
         user_dic['real_name'] = None
         user_dic['work_count'] = 0
         user_dic['institution'] = None
         user_dic['institution_id'] = None
-
         print(user_dic)
         cache.set(user_key, user_dic)
         celery_change_user_pass.delay(-1, user_id)
@@ -145,6 +154,13 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
         except:
             return JsonResponse({'result': 0, 'message': '该申请用户不存在'})
         if deal_result == 1:
+            flag = 0
+            try:
+                cache_get_by_id('author', 'author', form_dic["author_id"])
+            except:
+                flag = 1
+            if flag == 0:
+                return JsonResponse({'result': 0, 'message': '这个作者已经被认领门户'})
             user_dic["is_professional"] = 1
             user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
 
@@ -164,6 +180,8 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             message_id_list_dic['message_id_list'].append(this_message.id)
             cache.set(message_id_list_key, message_id_list_dic)
             celery_add_user_message_id_list.delay(user_id, this_message.id)
+            this_author = Author.objects.create(id=form_dic["author_id"])
+            cache_set_after_create('author', 'author', this_author.id, this_author.to_dic())
         else:
             user_dic["is_professional"] = -1
             user_dic["open_alex_id"] = None
@@ -233,6 +251,8 @@ def manager_delete_user_author(request):
         this_message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=-1,
                                               author_id=user_dic['open_alex_id'], real_name=user_dic['real_name'])
         cache_set_after_create('message', 'message', this_message.id, this_message.to_dic())
+        cache.delete('author:' + 'author:' + user_dic["open_alex_id"])
+        celery_delete_author.delay(user_dic["open_alex_id"])
         user_dic['is_professional'] = -1
         user_dic['open_alex_id'] = None
         user_dic['work_count'] = 0
