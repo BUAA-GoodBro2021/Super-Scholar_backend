@@ -146,7 +146,13 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
 
             author_id = form_dic["author_id"]
-            user_dic['work_count'] = open_alex.get_single_author(author_id)['works_count']
+            author_information = open_alex.get_single_author(author_id)
+
+            user_dic['work_count'] = author_information['works_count']
+            user_dic['institution'] = author_information['last_known_institution']['display_name']
+            user_dic['institution_id'] = author_information['last_known_institution']['id'].split('/')[-1]
+            user_dic['real_name'] = author_information['display_name']
+
             this_message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=1,
                                                   author_id=form_dic['author_id'], real_name=form_dic['real_name'],
                                                   institution=form_dic['institution'])
@@ -159,6 +165,7 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             user_dic["is_professional"] = -1
             user_dic["open_alex_id"] = None
             user_dic['real_name'] = None
+
             user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
             this_message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=0,
                                                   author_id=form_dic['author_id'], real_name=form_dic['real_name'],
@@ -220,6 +227,8 @@ def manager_delete_user_author(request):
         user_dic['is_professional'] = -1
         user_dic['open_alex_id'] = None
         user_dic['work_count'] = 0
+        user_dic['institution'] = None
+        user_dic['institution_id'] = None
         user_dic['real_name'] = None
         message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
         message_id_list_dic['message_id_list'].append(this_message.id)

@@ -32,6 +32,8 @@ class User(models.Model):
     is_professional = models.IntegerField('是否认证', default=-1)  # -1未认证，0正在申请，1已认证
     open_alex_id = models.CharField('对应的open_alex_id', max_length=200, db_index=True, default='', null=True)
     real_name = models.CharField('对应的作者真名', max_length=200, db_index=True, default='', null=True)
+    institution = models.CharField('作者的机构', max_length=200, db_index=True, default='', null=True)
+    institution_id = models.CharField('作者的机构的open_alex_id', max_length=200, db_index=True, default='', null=True)
     work_count = models.IntegerField('作者作品数量', default=0)
     # 实体属性
     created_time = models.DateTimeField('创建时间', auto_now_add=True)
@@ -55,6 +57,8 @@ class User(models.Model):
             'is_super': self.is_super,
             'is_professional': self.is_professional,
             'real_name': self.real_name,
+            'institution': self.institution,
+            'institution_id': self.institution_id,
             'work_count': self.work_count,
             'open_alex_id': self.open_alex_id,
             'created_time': self.created_time,
@@ -78,6 +82,7 @@ class FollowOfUser(models.Model):
             'user_id': self.id,
             'follow_id_list': follow_id_list,
         }
+
 
 class CollectionOfUser(models.Model):
     id = models.IntegerField('用户的id', primary_key=True, default=0)  # user_id
