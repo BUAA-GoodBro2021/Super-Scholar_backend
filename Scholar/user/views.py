@@ -203,10 +203,32 @@ def edit_introduction(request):
 
 # 返回当前用户信息
 @login_checker
+def get_other_user(request):
+    if request.method == 'POST':
+        # 获取用户id
+        data_json = json.loads(request.body.decode())
+        user_id = int(data_json.get('user_id', 0))
+
+        # 获取用户信息
+        try:
+            user_key, user_dict = cache_get_by_id('user', 'user', user_id)
+            result = {'result': 1, 'message': r"查找成功！", 'user': user_dict}
+        except:
+            result = {'result': 0, 'message': r"查找失败！"}
+
+        return JsonResponse(result)
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+
+
+@login_checker
 def get_user(request):
     if request.method == 'POST':
         # 获取用户id
         user_id = request.user_id
+
         # 获取用户信息
         user_key, user_dict = cache_get_by_id('user', 'user', user_id)
         result = {'result': 1, 'message': r"查找成功！", 'user': user_dict}

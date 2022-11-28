@@ -10,5 +10,6 @@ urlpatterns = [
     path('edit_introduction', views.edit_introduction),
     path('get_user', views.get_user),  # 返回当前用户信息
     path('get_user_info', views.get_user_info),  # 返回查看用户自己的门户信息
-    path('human_verify', views.human_verify)  # 人类行为验证
+    path('human_verify', views.human_verify),  # 人类行为验证
+    path('get_other_user', views.get_other_user),  # 获取他人用户信息
 ]

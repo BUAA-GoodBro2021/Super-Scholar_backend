@@ -44,8 +44,8 @@ class User(models.Model):
         db_table = 'scholar_user'
 
     def to_dic(self):
-        collection_package_list = CollectionPackage.objects.filter(user_id=self.id)
-        collection_package_id_list = [cp.id for cp in collection_package_list]
+        # collection_package_list = CollectionPackage.objects.filter(user_id=self.id)
+        # collection_package_id_list = [cp.id for cp in collection_package_list]
 
         return {
             'user_id': self.id,
@@ -63,7 +63,7 @@ class User(models.Model):
             'created_time': self.created_time,
             'updated_time': self.updated_time,
 
-            'collection_package_id_list': collection_package_id_list,
+            #'collection_package_id_list': collection_package_id_list,
             'unread_message_count': self.unread_message_count,
         }
 
