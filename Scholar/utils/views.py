@@ -66,6 +66,7 @@ def active(request, token):
         content["title"] = "感谢注册"
         content["message"] = "注册Summer平台成功！"
         UserMessageIdList.objects.create(id=user_id, message_id_list='[]')
+        cache_set_after_create('message','usermessageidlist')
         return render(request, 'EmailContent-check.html', content)
 
     # 重设密码

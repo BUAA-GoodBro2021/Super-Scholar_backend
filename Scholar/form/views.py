@@ -216,6 +216,7 @@ def manager_delete_user_author(request):
         user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
         this_message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=-1,
                                               author_id=user_dic['open_alex_id'], real_name=user_dic['real_name'])
+        cache_set_after_create('message', 'message', this_message.id, this_message.to_dic())
         user_dic['is_professional'] = -1
         user_dic['open_alex_id'] = None
         user_dic['work_count'] = 0
