@@ -274,14 +274,6 @@ def human_verify(request):
     # 获取到需要查询的页数以及每页多少个
     arr2 = data_json.get('arr', '[]')
 
-    # datas = list(enumerate(datas.split(", ")))
-    # arr2 = []
-    # for i, element in datas:
-    #     if i == 0:
-    #         element = element[1:]
-    #     if i == len(datas) - 1:
-    #         element = element[:-1]
-    #     arr2.append(int(element))
     sum1 = 0
     for data in arr2:
         sum1 += data
@@ -291,6 +283,6 @@ def human_verify(request):
         sum2 += pow(data - avg, 2)
     stddev = sum2 / len(arr2)
     if stddev != 0:
-        return JsonResponse({'result': 1, 'message': '真人验证通过'})
+        return JsonResponse({'result': 1, 'flag': True, 'message': '真人验证通过'})
     else:
-        return JsonResponse({'result': 0, 'message': '真人验证失败'})
+        return JsonResponse({'result': 1, 'flag': False, 'message': '真人验证失败'})
