@@ -80,7 +80,6 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
         user_dic['institution'] = None
         user_dic['institution_id'] = None
 
-
         print(user_dic)
         cache.set(user_key, user_dic)
         celery_change_user_pass.delay(-1, user_id)
@@ -222,7 +221,10 @@ def manager_delete_user_author(request):
     if not super_user_dic['is_super']:
         return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
     user_id = int(data_json.get('user_id'))
-    user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+    try:
+        user_key, user_dic = cache_get_by_id('user', 'user', user_id)
+    except:
+        return JsonResponse({'result': 0, 'message': '此用户不存在'})
     if user_dic['is_professional'] != 1:
         return JsonResponse({'result': 0, 'message': '此用户没有门户或正在申请，无法解除'})
     else:
