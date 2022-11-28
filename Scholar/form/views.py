@@ -135,8 +135,19 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             return JsonResponse({'result': 0, 'message': '当前用户不存在'})
         if not super_user_dic['is_super']:
             return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
+
         deal_result = int(data_json.get('deal_result', 2))
         user_id = int(data_json.get('user_id'))
+        form_key, form_dic = cache_get_by_id('form', 'form', user_id)
+        if deal_result == 1:
+            flag = 0
+            try:
+                cache_get_by_id('author', 'author', form_dic["author_id"])
+            except:
+                flag = 1
+            if flag == 0:
+                return JsonResponse({'result': 0, 'message': '这个作者已经被认领门户'})
+
         form_handling_key, form_handling_dic = cache_get_by_id('form', 'formlist', 0)  # 从cache中获得正在处理的申请的id列表
         form_handling_id_list = form_handling_dic["Form_id_list"]
         try:
@@ -146,7 +157,6 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
         form_handling_dic["Form_id_list"] = form_handling_id_list
         cache.set(form_handling_key, form_handling_dic)
         celery_remove_form_list.delay(0, user_id)
-        form_key, form_dic = cache_get_by_id('form', 'form', user_id)
         cache.delete('form:' + 'form:' + str(user_id))
         celery_del_form.delay(user_id)
 
@@ -155,13 +165,7 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
         except:
             return JsonResponse({'result': 0, 'message': '该申请用户不存在'})
         if deal_result == 1:
-            flag = 0
-            try:
-                cache_get_by_id('author', 'author', form_dic["author_id"])
-            except:
-                flag = 1
-            if flag == 0:
-                return JsonResponse({'result': 0, 'message': '这个作者已经被认领门户'})
+
             user_dic["is_professional"] = 1
             user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
 
