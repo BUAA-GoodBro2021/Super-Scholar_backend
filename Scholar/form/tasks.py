@@ -94,6 +94,7 @@ def celery_user_pass_and_add_unread_message_count(user_id, user_dic):
     user.institution_id = user_dic['institution_id']
     user.work_count = user_dic['work_count']
     user.real_name = user_dic['real_name']
+    user.save()
     print('celery_user_pass_and_add_unread_message_count')
 
 
