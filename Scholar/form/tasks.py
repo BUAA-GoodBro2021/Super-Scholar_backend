@@ -85,6 +85,18 @@ def celery_change_user_pass_and_add_unread_message_count(deal_result, user_id):
     print('celery_change_user_pass')
 
 
+@app.task()
+def celery_user_pass_and_add_unread_message_count(user_id, user_dic):
+    user = User.objects.get(id=user_id)
+    user.unread_message_count = user.unread_message_count + 1
+    user.is_professional = 1
+    user.institution = user_dic['institution']
+    user.institution_id = user_dic['institution_id']
+    user.work_count = user_dic['work_count']
+    user.real_name = user_dic['real_name']
+    print('celery_user_pass_and_add_unread_message_count')
+
+
 @app.task
 def celery_add_unread_message_count(user_id):
     user = User.objects.get(id=user_id)

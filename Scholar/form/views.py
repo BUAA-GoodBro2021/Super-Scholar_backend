@@ -33,11 +33,6 @@ def user_claim_author(request):  # 用户申请认领门户
         if user_dic["is_professional"] == 1:
             return JsonResponse({'result': 0, 'message': '用户已经认领门户，请放弃当前门户后再次申请'})
         form_handling_key, form_handling_dic = cache_get_by_id('form', 'formlist', 0)  # 从cache中获得正在处理的申请的id列表
-        try:
-            new_claim = Form.objects.create(author_id=author_id, content=content, id=user_id, institution=institution,
-                                            real_name=real_name, claim_time=now())
-        except:
-            return JsonResponse({'result': 0, 'message': '用户已经认领门户，请放弃当前门户后再次申请'})
         flag = 0
         try:
             cache_get_by_id('author', 'author', author_id)
@@ -45,6 +40,12 @@ def user_claim_author(request):  # 用户申请认领门户
             flag = 1
         if flag == 0:
             return JsonResponse({'result': 0, 'message': '这个作者已经被认领门户'})
+        try:
+            new_claim = Form.objects.create(author_id=author_id, content=content, id=user_id, institution=institution,
+                                            real_name=real_name, claim_time=now())
+        except:
+            return JsonResponse({'result': 0, 'message': '用户正在申请认领门户，请放弃当前申请后再次申请'})
+
         cache_set_after_create('form', 'form', new_claim.id, new_claim.to_dic())  # 将刚刚生成的表单放在redis中
         user_dic["is_professional"] = 0  # 表示正在申请
         user_dic["open_alex_id"] = author_id
@@ -182,6 +183,7 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             celery_add_user_message_id_list.delay(user_id, this_message.id)
             this_author = Author.objects.create(id=form_dic["author_id"])
             cache_set_after_create('author', 'author', this_author.id, this_author.to_dic())
+            celery_user_pass_and_add_unread_message_count.delay(user_id, user_dic)
         else:
             user_dic["is_professional"] = -1
             user_dic["open_alex_id"] = None
@@ -199,8 +201,8 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             message_id_list_dic['message_id_list'].append(this_message.id)
             cache.set(message_id_list_key, message_id_list_dic)
             celery_add_user_message_id_list.delay(user_id, this_message.id)
+            celery_change_user_pass_and_add_unread_message_count.delay(deal_result, user_id)
         cache.set(user_key, user_dic)
-        celery_change_user_pass_and_add_unread_message_count.delay(deal_result, user_id)
 
         return JsonResponse({'result': 1, 'message': '处理成功'})
 
