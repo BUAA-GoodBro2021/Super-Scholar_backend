@@ -8,6 +8,7 @@ class Comment(models.Model):
     ancestor_id = models.IntegerField('对应顶级评论的id', default=0)
     created_time = models.DateTimeField('创建时间', auto_now_add=True)
     work_id = models.CharField('评论文章的id', max_length=200, default="")
+    work_name = models.CharField('评论文章的题目', max_length=1024, default="")
     content = models.TextField('评论内容', max_length=1024, default="")
     is_deleted = models.BooleanField('评论是否被删除', default=False)
     reply_user_id = models.IntegerField('回复评论的用户id', default=0)
@@ -24,6 +25,7 @@ class Comment(models.Model):
             'ancestor_id': self.ancestor_id,
             'created_time': self.created_time,
             'work_id': self.work_id,
+            'work_name': self.work_name,
             'content': self.content,
             'is_deleted': self.is_deleted,
             'reply_user_id': self.reply_user_id,

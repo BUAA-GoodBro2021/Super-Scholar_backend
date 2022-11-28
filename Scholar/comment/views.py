@@ -6,6 +6,8 @@ from comment.utils import get_all_comments_by_work_id
 from utils.Redis_utils import *
 
 from utils.Sending_utils import *
+from message.models import *
+from form.tasks import *
 
 
 @login_checker
@@ -15,6 +17,7 @@ def add_comment(request):
         data_json = json.loads(request.body.decode())
         user_id = request.user_id
         work_id = data_json.get('work_id')
+        work_name = data_json.get('work_name')
         content = data_json.get('content')
 
         # 异常处理
@@ -24,7 +27,7 @@ def add_comment(request):
             return JsonResponse(result)
 
         # 创建数据
-        comment = Comment.objects.create(user_id=user_id, work_id=work_id, content=content)
+        comment = Comment.objects.create(user_id=user_id, work_id=work_id, content=content, work_name=work_name)
 
         # 对于顶级评论而言，其对应的祖先id就为其本身。
         comment.ancestor_id = comment.id
@@ -83,22 +86,48 @@ def reply_comment(request):
 
         # 获取父评论信息
         father_comment_key, father_comment_dic = cache_get_by_id('comment', 'comment', comment_id)
+        work_name = father_comment_dic['work_name']
 
-        # 创建数据
+        # 获取被评论用户的用户信息
+        reply_user_id = father_comment_dic['user_id']
+        reply_user_key, reply_user_dic = cache_get_by_id('user', 'user', reply_user_id)
+
+        # 创建数据——发送站内信，添加评论
+        message = Message.objects.create(
+            send_id=user_id,
+            receiver_id=reply_user_id,
+            message_type=4,
+            work_name=work_name,
+            work_open_alex_id=work_id,
+            content=father_comment_dic['content'],
+            reply=content,
+        )
         comment = Comment.objects.create(
             level=1,
             user_id=user_id,
             work_id=work_id,
+            work_name=work_name,
             content=content,
             father_id=comment_id,
-            reply_user_id=father_comment_dic['user_id'],
-            ancestor_id=father_comment_dic['ancestor_id'])
+            reply_user_id=reply_user_id,
+            ancestor_id=father_comment_dic['ancestor_id']
+        )
+
         # 更新缓存
-        cache_set_after_create("comment", "comment", comment.id, comment.to_dic())
+        reply_user_dic['unread_message_count'] = reply_user_dic['unread_message_count'] + 1  # 更新被评论用户的未读信息
+        cache.set(reply_user_key, reply_user_dic)
+
+        cache_set_after_create('message', 'message', message.id, message.to_dic())  # 添加message缓存
+        cache_set_after_create("comment", "comment", comment.id, comment.to_dic())  # 添加comment缓存
+
+        message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', reply_user_id)
+        message_id_list_dic['message_id_list'].append(message.id)
+        cache.set(message_id_list_key, message_id_list_dic)
 
         # 延迟更新数据库
-        print("Begin to update database!")
         add_comment_of_comment.delay(comment.id, comment_id)
+        celery_add_user_message_id_list.delay(reply_user_id, message.id)
+        celery_add_unread_message_count(reply_user_id)
 
         result = {'result': 1, 'message': r"添加成功！"}
         return JsonResponse(result)
@@ -193,4 +222,3 @@ def reset_all_comment(request):
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
-
