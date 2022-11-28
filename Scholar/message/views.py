@@ -24,10 +24,15 @@ def look_message_list(request):
     for message_id in message_id_list_dic["message_id_list"]:
         message_key, message_dic = cache_get_by_id('message', 'message', message_id)
         send_id = message_dic['send_id']
-        message_dic['send_name'] = ''
+
         if send_id != 0:
-            user_key, user_dic = cache_get_by_id('user', 'user', send_id)
+            try:
+                user_key, user_dic = cache_get_by_id('user', 'user', send_id)
+            except:
+                continue
             message_dic['send_name'] = user_dic['username']
+        else:
+            message_dic['send_name'] = '管理员'
 
         message_list.append(message_dic)
     message_list.reverse()
