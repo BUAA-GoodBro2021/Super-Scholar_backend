@@ -144,7 +144,7 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
         if deal_result == 1:
             user_dic["is_professional"] = 1
             user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
-            form_key, form_dic = cache_get_by_id('form', 'form', user_id)
+
             author_id = form_dic["author_id"]
             user_dic['work_count'] = open_alex.get_single_author(author_id)['works_count']
             this_message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=1,
