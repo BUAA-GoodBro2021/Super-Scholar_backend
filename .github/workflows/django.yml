@@ -17,3 +17,4 @@ jobs:
         sshpass -p ${{secrets.PASSWORD}} ssh -o StrictHostKeyChecking=no ${{secrets.USER}}@${{secrets.IP1}} "cd ${DST}; git pull;"
         sshpass -p ${{secrets.PASSWORD}} ssh -o StrictHostKeyChecking=no ${{secrets.USER}}@${{secrets.IP2}} "cd ${DST}; git pull;"
         sshpass -p ${{secrets.PASSWORD}} ssh -o StrictHostKeyChecking=no ${{secrets.USER}}@${{secrets.IP3}} "cd ${DST}; git pull;"
+        sshpass -p ${{secrets.PASSWORD}} ssh -o StrictHostKeyChecking=no ${{secrets.USER}}@${{secrets.IP1}} "cd ${DST}; ps -ef | grep celery | grep -v grep | awk '{print $2}' | xargs kill -9; celery -A Scholar worker -P gevent -c 1000 > celery.log 2>&1 &;"
