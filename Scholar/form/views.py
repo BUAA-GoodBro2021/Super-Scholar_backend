@@ -76,6 +76,10 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
         user_dic["is_professional"] = -1
         user_dic["open_alex_id"] = None
         user_dic['real_name'] = None
+        user_dic['work_count'] = 0
+        user_dic['institution'] = None
+        user_dic['institution_id'] = None
+
 
         print(user_dic)
         cache.set(user_key, user_dic)
@@ -165,6 +169,9 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             user_dic["is_professional"] = -1
             user_dic["open_alex_id"] = None
             user_dic['real_name'] = None
+            user_dic['work_count'] = 0
+            user_dic['institution'] = None
+            user_dic['institution_id'] = None
 
             user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
             this_message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=0,

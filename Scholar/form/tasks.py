@@ -60,6 +60,9 @@ def celery_change_user_pass(deal_result, user_id):
         user.is_professional = -1
         user.open_alex_id = None
         user.real_name = None
+        user.institution_id = None
+        user.institution = None
+        user.work_count = 0
     user.save()
     print('celery_change_user_pass')
 
@@ -74,8 +77,12 @@ def celery_change_user_pass_and_add_unread_message_count(deal_result, user_id):
         user.is_professional = -1
         user.open_alex_id = None
         user.real_name = None
+        user.institution_id = None
+        user.institution = None
+        user.work_count = 0
     user.save()
     print('celery_change_user_pass')
+
 
 @app.task
 def celery_add_unread_message_count(user_id):
@@ -84,12 +91,15 @@ def celery_add_unread_message_count(user_id):
     user.save()
     print('celery_change_user_pass')
 
+
 @app.task
 def celery_delete_user_author(user_id):
     user = User.objects.get(id=user_id)
     user.is_professional = -1
     user.open_alex_id = None
     user.real_name = None
+    user.institution_id = None
+    user.institution = None
     user.work_count = 0
     user.save()
     print('celery_delete_user_author')
@@ -103,5 +113,3 @@ def celery_add_user_message_id_list(user_id, message_id):
     user_message_list.message_id_list = str(message_id_list)
     user_message_list.save()
     print('celery_add_user_message_id_list')
-
-
