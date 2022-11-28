@@ -146,7 +146,7 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
             except:
                 flag = 1
             if flag == 0:
-                return JsonResponse({'result': 0, 'message': '这个作者已经被认领门户'})
+                return JsonResponse({'result': 0, 'message': '这个作者已经被认领门户，请管理员认真审核'})
 
         form_handling_key, form_handling_dic = cache_get_by_id('form', 'formlist', 0)  # 从cache中获得正在处理的申请的id列表
         form_handling_id_list = form_handling_dic["Form_id_list"]
