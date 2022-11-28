@@ -266,3 +266,31 @@ def get_user_info(request):
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
+
+
+def human_verify(request):
+    # 获取表单信息
+    data_json = json.loads(request.body.decode())
+    # 获取到需要查询的页数以及每页多少个
+    arr2 = data_json.get('arr', '[]')
+
+    # datas = list(enumerate(datas.split(", ")))
+    # arr2 = []
+    # for i, element in datas:
+    #     if i == 0:
+    #         element = element[1:]
+    #     if i == len(datas) - 1:
+    #         element = element[:-1]
+    #     arr2.append(int(element))
+    sum1 = 0
+    for data in arr2:
+        sum1 += data
+    avg = sum1 * 1.0 / len(arr2)
+    sum2 = 0.0
+    for data in arr2:
+        sum2 += pow(data - avg, 2)
+    stddev = sum2 / len(arr2)
+    if stddev != 0:
+        return JsonResponse({'result': 1, 'message': '真人验证通过'})
+    else:
+        return JsonResponse({'result': 0, 'message': '真人验证失败'})
