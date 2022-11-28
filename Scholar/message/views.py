@@ -23,6 +23,12 @@ def look_message_list(request):
     message_list = []
     for message_id in message_id_list_dic["message_id_list"]:
         message_key, message_dic = cache_get_by_id('message', 'message', message_id)
+        send_id = message_dic['send_id']
+        message_dic['send_name'] = ''
+        if send_id != 0:
+            user_key, user_dic = cache_get_by_id('user', 'user', send_id)
+            message_dic['send_name'] = user_dic['username']
+
         message_list.append(message_dic)
     message_list.reverse()
     return JsonResponse({'result': 1, 'message': '获得用户消息列表成功', 'message_list': message_list})
@@ -53,4 +59,4 @@ def look_unread_message_count(request):
     user_id = request.user_id
     user_key, user_dic = cache_get_by_id('user', 'user', user_id)
     return JsonResponse(
-        {'result': 0, 'message': '获取未读消息个数成功', 'unread_message_count': user_dic['unread_message_count']})
+        {'result': 1, 'message': '获取未读消息个数成功', 'unread_message_count': user_dic['unread_message_count']})
