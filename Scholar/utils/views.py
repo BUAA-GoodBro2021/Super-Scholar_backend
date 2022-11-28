@@ -65,7 +65,12 @@ def active(request, token):
         # 返回注册成功的界面
         content["title"] = "感谢注册"
         content["message"] = "注册Summer平台成功！"
-        UserMessageIdList.objects.create(id=user_id, message_id_list='[]')
+        try:
+            this_UserMessageIdList = UserMessageIdList.objects.create(id=int(user_id), message_id_list='[]')
+        except:
+            return JsonResponse({'result': 0, 'message': '不能重复点击哦'})
+        cache_set_after_create('message', 'usermessageidlist', this_UserMessageIdList.id,
+                               this_UserMessageIdList.to_dic())
         return render(request, 'EmailContent-check.html', content)
 
     # 重设密码

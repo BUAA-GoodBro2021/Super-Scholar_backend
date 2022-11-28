@@ -187,7 +187,7 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
         user_key, user_dic = cache_get_by_id('user', 'user', work_dic['user_id'])
     except:
         return JsonResponse({'result': 0, 'message': '上传论文的用户不存在'})
-    user_dic['unread_message_count'] = user_dic['unread_message_count']+1
+    user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
     print(user_dic)
     cache.set(user_key, user_dic)
     celery_user_add_unread_message_count.delay(work_dic['user_id'])
