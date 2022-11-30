@@ -193,42 +193,10 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
     celery_user_add_unread_message_count.delay(work_dic['user_id'])
     # 说明上传PDF正确
     if deal_result == 1:
+
+        clear_cache_about_pdf()
+
         work_dic['has_pdf'] = 1
-
-        # 获取缓存
-        recommended_work_list_by_cited_count_key = json.dumps({
-            "entity_type": "works",
-            "params": {
-                "filter": {
-                    "from_publication_date": "2000-01-01",
-                    "to_publication_date": "2023-11-01"
-                },
-                "sort": {"cited_by_count": "desc"},
-                "page": 1,
-                "per_page": 25
-            }
-        })
-
-        recommended_work_list_by_publication_date_key = json.dumps({
-            "entity_type": "works",
-            "params": {
-                "filter": {"to_publication_date": "2023-11-01"},
-                "sort": {"publication_date": "desc"},
-                "page": 1,
-                "per_page": 25
-            }
-        })
-
-        recommended_work_list_by_cited_count = cache.get(recommended_work_list_by_cited_count_key)
-        recommended_work_list_by_publication_date = cache.get(recommended_work_list_by_publication_date_key)
-        get_open_alex_data = get_open_alex_data_num()
-
-        # 清理缓存
-        cache.clear()
-        if recommended_work_list_by_cited_count is not None and recommended_work_list_by_publication_date is not None and get_open_alex_data is not None:
-            cache.set(recommended_work_list_by_cited_count_key, recommended_work_list_by_cited_count)
-            cache.set(recommended_work_list_by_publication_date_key, recommended_work_list_by_publication_date)
-            cache.set("open_alex_num", get_open_alex_data)
         this_message = Message.objects.create(send_id=0, receiver_id=work_dic['user_id'], message_type=3,
                                               work_open_alex_id=work_dic['id'], work_name=work_dic['work_name'],
                                               pdf=work_dic['pdf'], url=work_dic['url'])
@@ -241,6 +209,7 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
         celery_change_pdf_upload_form_has.delay(work_id)
 
     elif deal_result == -1:
+        clear_cache_about_pdf()
         this_message = Message.objects.create(send_id=0, receiver_id=work_dic['user_id'], message_type=2,
                                               work_open_alex_id=work_dic['id'], work_name=work_dic['work_name'],
                                               pdf=work_dic['pdf'], url=work_dic['url'])
@@ -284,43 +253,14 @@ def user_give_up_upload_pdf(request):
         return JsonResponse({"result": 0, "message": '您不是上传此pdf的用户，删除此pdf请联系管理员'})
     has_pdf = work_dic['has_pdf']
     if has_pdf == 1:
-        # 获取缓存
-        recommended_work_list_by_cited_count_key = json.dumps({
-            "entity_type": "works",
-            "params": {
-                "filter": {
-                    "from_publication_date": "2000-01-01",
-                    "to_publication_date": "2023-11-01"
-                },
-                "sort": {"cited_by_count": "desc"},
-                "page": 1,
-                "per_page": 25
-            }
-        })
 
-        recommended_work_list_by_publication_date_key = json.dumps({
-            "entity_type": "works",
-            "params": {
-                "filter": {"to_publication_date": "2023-11-01"},
-                "sort": {"publication_date": "desc"},
-                "page": 1,
-                "per_page": 25
-            }
-        })
-
-        recommended_work_list_by_cited_count = cache.get(recommended_work_list_by_cited_count_key)
-        recommended_work_list_by_publication_date = cache.get(recommended_work_list_by_publication_date_key)
-        get_open_alex_data = get_open_alex_data_num()
-
-        # 清理缓存
-        cache.clear()
-        if recommended_work_list_by_cited_count is not None and recommended_work_list_by_publication_date is not None and get_open_alex_data is not None:
-            cache.set(recommended_work_list_by_cited_count_key, recommended_work_list_by_cited_count)
-            cache.set(recommended_work_list_by_publication_date_key, recommended_work_list_by_publication_date)
-            cache.set("open_alex_num", get_open_alex_data)
+        clear_cache_about_pdf()
 
         celery_delete_work_pdf.delay(work_id)
     elif work_dic['has_pdf'] == 0:
+
+        clear_cache_about_pdf()
+
         upload_pdf_form_list_key, upload_pdf_form_list_dic = cache_get_by_id('work', 'uploadworkpdfformlist', 1)
         upload_pdf_form_id_list = upload_pdf_form_list_dic['id_list']
         upload_pdf_form_id_list.remove(work_id)
@@ -342,3 +282,42 @@ def user_give_up_upload_pdf(request):
         return JsonResponse({"result": 1, "message": '删除pdf成功'})
     else:
         return JsonResponse({"result": 1, "message": '取消上传pdf成功'})
+
+
+def clear_cache_about_pdf():
+    # 获取缓存
+    recommended_work_list_by_cited_count_key = json.dumps({
+        "entity_type": "works",
+        "params": {
+            "filter": {
+                "from_publication_date": "2000-01-01",
+                "to_publication_date": "2023-11-01"
+            },
+            "sort": {"cited_by_count": "desc"},
+            "page": 1,
+            "per_page": 25
+        }
+    })
+
+    recommended_work_list_by_publication_date_key = json.dumps({
+        "entity_type": "works",
+        "params": {
+            "filter": {"to_publication_date": "2023-11-01"},
+            "sort": {"publication_date": "desc"},
+            "page": 1,
+            "per_page": 25
+        }
+    })
+
+    recommended_work_list_by_cited_count = cache.get(recommended_work_list_by_cited_count_key)
+    recommended_work_list_by_publication_date = cache.get(recommended_work_list_by_publication_date_key)
+    get_open_alex_data = get_open_alex_data_num()
+
+    # 清理缓存
+    cache.clear()
+    if recommended_work_list_by_cited_count is not None:
+        cache.set(recommended_work_list_by_cited_count_key, recommended_work_list_by_cited_count)
+    if recommended_work_list_by_publication_date is not None:
+        cache.set(recommended_work_list_by_publication_date_key, recommended_work_list_by_publication_date)
+    if get_open_alex_data is not None:
+        cache.set("open_alex_num", get_open_alex_data)

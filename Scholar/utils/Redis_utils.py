@@ -120,6 +120,24 @@ def cache_get_list_by_diophila(request_body_json):
                                                      sort=request_body_json['params'].get('sort', None),
                                                      per_page=int(request_body_json['params'].get('per_page', 25)),
                                                      pages=[int(request_body_json['params'].get('page', 1)), ]))
+
+            # 自己作品列表长度
+            value_length = len(value[0]['results'])
+            for i in range(value_length):
+                # 如果 openAlex 信息中没有原文
+                if not value[0]['results'][i]['open_access'].get('is_oa', False):
+                    try:
+                        # 是否上传 PDF, 如果上传并审核成功是 1, 上传正在审核是 0, 如果没有上传是 -1
+                        work_key, work_dic = cache_get_by_id('work', 'work',
+                                                             value[0]['results'][i]['id'].split('/')[-1])
+                        value[0]['results'][i]['open_access']['is_oa'] = work_dic['has_pdf']
+                        value[0]['results'][i]['open_access']['oa_url'] = work_dic['url']
+                    except:
+                        value[0]['results'][i]['open_access']['is_oa'] = -1
+                # 如果 openAlex 信息中有原文，状态是 1
+                else:
+                    value[0]['results'][i]['open_access']['is_oa'] = 1
+
         elif request_body_json['entity_type'] == 'authors':
             value = list(open_alex.get_list_of_authors(filters=request_body_json['params'].get('filter', None),
                                                        search=request_body_json['params'].get('search', None),
