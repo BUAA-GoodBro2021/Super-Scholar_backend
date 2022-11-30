@@ -270,16 +270,20 @@ def get_user_info(request):
         # 自己作品列表长度
         user_info_length = len(user_info[0]['results'])
         for i in range(user_info_length):
-            # 如果没有原文
-            if not user_info[0]['results'][i]['open_access'].get('oa_url', False):
+            # 如果 openAlex 信息中没有原文
+            if not user_info[0]['results'][i]['open_access'].get('is_oa', False):
                 try:
-                    # 说明上传了PDF,且该PDF没有删除
+                    # 是否上传 PDF, 如果上传并审核成功是 1, 上传正在审核是 0, 如果没有上传是 -1
                     work_key, work_dic = cache_get_by_id('work', 'work',
                                                          user_info[0]['results'][i]['id'].split('/')[-1])
-                    user_info[0]['results'][i]['open_access']['is_oa'] = True
+                    user_info[0]['results'][i]['open_access']['is_oa'] = work_dic['has_pdf']
                     user_info[0]['results'][i]['open_access']['oa_url'] = work_dic['url']
                 except:
-                    pass
+                    user_info[0]['results'][i]['open_access']['is_oa'] = -1
+            # 如果 openAlex 信息中有原文，状态是 1
+            else:
+                user_info[0]['results'][i]['open_access']['is_oa'] = 1
+
         result = {'result': 1, 'message': r"获取门户信息成功！", 'user_info': user_info}
         return JsonResponse(result)
     else:
