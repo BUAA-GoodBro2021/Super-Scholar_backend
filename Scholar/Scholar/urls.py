@@ -28,7 +28,8 @@ urlpatterns = [
     path('form/', include('form.urls')),
     path('comment/', include('comment.urls')),
     path('work/', include('work.urls')),
-    path('message/',include('message.urls')),
+    path('message/', include('message.urls')),
+    path('author/', include('author.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

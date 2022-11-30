@@ -28,7 +28,7 @@ def user_upload_pdf(request):  # 用户上传pdf
     # 获取用户上传的头像并保存
     pdf = request.FILES.get("pdf", None)
     if not pdf:
-        result = {'result': 0, 'message': r"请上传图片！"}
+        result = {'result': 0, 'message': r"请上传pdf！"}
         return JsonResponse(result)
     # 获取文件尾缀并
     # 修改名称
