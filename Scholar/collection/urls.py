@@ -8,7 +8,8 @@ urlpatterns = [
     path('collect_work', views.collect_work),
     path('cancel_work', views.cancel_work),
     path('delete_collection_package', views.delete_collection_package),
-    path('get_collection_package_list', views.get_collection_package_list)
+    path('get_collection_package_list', views.get_collection_package_list),
+    path('get_collection_package_by_id', views.get_collection_package_by_id),
 
     # path("get_index_data_view", views.get_index_data),
 ]

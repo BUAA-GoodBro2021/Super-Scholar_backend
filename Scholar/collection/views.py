@@ -243,3 +243,38 @@ def get_collection_package_list(request):
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
+
+
+@login_checker
+def get_collection_package_by_id(request):
+    if request.method == 'POST':
+        # 获取表单信息
+        data_json = json.loads(request.body.decode())
+        user_id = request.user_id
+        work_id = data_json.get('work_id', '-1')
+
+        # 返回值
+        package_list = []
+
+        user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
+        package_id_list = user_dic['collection_id_list']
+
+        for package_id in package_id_list:
+            package_key, package_dic = cache_get_by_id('collection', 'collectionpackage', package_id)
+            if work_id in package_dic['works']:
+                package_list.append({
+                        'package_id': package_dic['id'],
+                        'package_name': package_dic['name'],
+                    })
+
+        if not package_list:
+            result = {'result': 0, 'message': r"当前用户没有收藏该文章！"}
+        else:
+            result = {'result': 1, 'message': r"查找成功！", 'package_list':package_list}
+
+        return JsonResponse(result)
+
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
