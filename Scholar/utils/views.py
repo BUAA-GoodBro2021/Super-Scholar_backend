@@ -1,6 +1,8 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 import random
+
+from history.models import History
 from properties import *
 from utils.tasks import *
 from utils.Login_utils import *
@@ -44,7 +46,6 @@ def active(request, token):
         content["message"] = "啊偶，用户名好像已经被注册啦，再去挑选一个你喜欢的用户名叭！"
         return render(request, 'EmailContent-check.html', content)
 
-
     # 使用邮箱激活账号
     if 'email' in payload.keys():
         email = payload.get('email')
@@ -56,7 +57,6 @@ def active(request, token):
                 content["title"] = "激活失败"
                 content["message"] = "啊偶，该用户已经被激活了！"
                 return render(request, 'EmailContent-check.html', content)
-
 
         # 激活用户 验证邮箱
         user_dict['is_active'] = True
@@ -74,13 +74,21 @@ def active(request, token):
 
         # 返回注册成功的界面
         content["title"] = "感谢注册"
-        content["message"] = "注册Summer平台成功！"
+        content["message"] = "注册 Super Scholar 学术成功分享平台成功！"
         try:
             this_UserMessageIdList = UserMessageIdList.objects.create(id=int(user_id), message_id_list='[]')
         except:
             return JsonResponse({'result': 0, 'message': '不能重复点击哦'})
         cache_set_after_create('message', 'usermessageidlist', this_UserMessageIdList.id,
                                this_UserMessageIdList.to_dic())
+
+        try:
+            history = History.objects.create(id=int(user_id))
+        except:
+            return JsonResponse({'result': 0, 'message': '不能重复点击哦'})
+        # 创建每一个人的历史记录
+        cache_set_after_create('history', 'history', history.id, history.to_dic())
+
         user_id_list_key, user_id_list_dic = cache_get_by_id('user', 'userlist', 0)
         user_id_list_dic['id_list'].append(int(user_id))
         cache.set(user_id_list_key, user_id_list_dic)

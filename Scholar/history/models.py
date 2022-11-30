@@ -2,7 +2,7 @@ from django.db import models
 
 
 class History(models.Model):
-    user_id = models.IntegerField('用户的id', default=0)
+    id = models.IntegerField('用户的id', primary_key=True, default=0)  # user_id
     history_list = models.TextField('用户的搜索历史', default='')
 
     class Meta:
@@ -12,6 +12,5 @@ class History(models.Model):
         history_list = self.history_list.split('|')
         return {
             'id': self.id,
-            'user_id': self.user_id,
             'history_list': history_list,
         }

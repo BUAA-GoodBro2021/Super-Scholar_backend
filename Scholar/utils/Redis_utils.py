@@ -62,7 +62,7 @@ def cache_get_by_id(app_label, model_name, model_id):
 # 添加某个类的所有缓存
 def cache_set_all(app_label, model_name):
     # 加载所有类
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Summer.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Scholar.settings')
     django.setup()
     try:
         # 得到需要进行操作的类
@@ -80,7 +80,7 @@ def cache_set_all(app_label, model_name):
 # 删除某个类的所有缓存
 def cache_del_all(app_label, model_name):
     # 加载所有类
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Summer.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Scholar.settings')
     django.setup()
     try:
         # 得到需要进行操作的类
