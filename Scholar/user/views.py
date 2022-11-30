@@ -131,17 +131,22 @@ def find_password(request):
         # 获取表单信息
         data_json = json.loads(request.body.decode())
         print(data_json)
+        email = data_json.get('email', '')
         username = data_json.get('username', '')
         password1 = data_json.get('password1', '')
         password2 = data_json.get('password2', '')
 
         # 检测异常情况
         if not User.objects.filter(username=username).exists():
-            result = {'result': 0, 'message': r'用户名不存在!'}
+            result = {'result': 0, 'message': r'用户不存在!'}
+            return JsonResponse(result)
+
+        if not User.objects.filter(email=email).exists():
+            result = {'result': 0, 'message': r'用户不存在!'}
             return JsonResponse(result)
 
         if len(password1) == 0 or len(password2) == 0:
-            result = {'result': 0, 'message': r'用户名与密码不允许为空!'}
+            result = {'result': 0, 'message': r'用户名或密码不允许为空!'}
             return JsonResponse(result)
 
         if password1 != password2:
