@@ -44,9 +44,19 @@ def active(request, token):
         content["message"] = "啊偶，用户名好像已经被注册啦，再去挑选一个你喜欢的用户名叭！"
         return render(request, 'EmailContent-check.html', content)
 
+
     # 使用邮箱激活账号
     if 'email' in payload.keys():
         email = payload.get('email')
+
+        # 防止同一邮箱反复激活
+        user_list = User.objects.filter(email=email)
+        for user in user_list:
+            if user.is_active:
+                content["title"] = "激活失败"
+                content["message"] = "啊偶，该用户已经被激活了！"
+                return render(request, 'EmailContent-check.html', content)
+
 
         # 激活用户 验证邮箱
         user_dict['is_active'] = True
@@ -80,6 +90,7 @@ def active(request, token):
     # 重设密码
     if 'password' in payload.keys():
         password = payload.get('password')
+        email = payload.get('email')
 
         # 同步mysql(password不在缓存里面)
         # celery_change_password.delay(user_id, password)
