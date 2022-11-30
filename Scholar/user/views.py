@@ -185,15 +185,28 @@ def edit_introduction(request):
         # 获取表单信息
         data_json = json.loads(request.body.decode())
         user_id = request.user_id
+        username = data_json.get('name', '')
         introduction = data_json.get('introduction', 'Leave something to help others get to know you better!')
+
+        # 异常情况
+        if len(username) == 0:
+            result = {'result': 0, 'message': r"用户名的长度不能为0！"}
+            return JsonResponse(result)
+
+        if User.objects.filter(username=username, is_active=True).exists():
+            result = {'result': 0, 'message': r'用户已存在!'}
+            return JsonResponse(result)
 
         # 获取信息
         user_key, user_dict = cache_get_by_id('user', 'user', user_id)
+
         # 修改信息，同步缓存
+        user_dict['username'] = username
         user_dict['introduction'] = introduction
         cache.set(user_key, user_dict)
+
         # 修改数据库
-        celery_change_introduction.delay(user_id, introduction)
+        celery_change_introduction.delay(user_id, introduction, username)
 
         result = {'result': 1, 'message': r"修改成功！", 'user': user_dict}
         return JsonResponse(result)

@@ -3,9 +3,10 @@ from Scholar.celery import app
 
 
 @app.task
-def celery_change_introduction(user_id, introduction):
+def celery_change_introduction(user_id, introduction, username):
     user = User.objects.get(id=user_id)
     user.introduction = introduction
+    user.username = username
     user.save()
     return user.to_dic()
 
