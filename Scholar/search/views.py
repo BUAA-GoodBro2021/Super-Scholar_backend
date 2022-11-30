@@ -83,7 +83,7 @@ def associate_content_view(request):
         # 添加认证邮箱
         params['mailto'] = open_alex_mailto_email
         response = requests.get(open_alex_base_url + "autocomplete/" + entity_type, params=params)
-        return JsonResponse(response.json())
+        return JsonResponse({'result': 1, 'message': r"联想成功", 'associate_content': response.json()})
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
         return JsonResponse(result)
