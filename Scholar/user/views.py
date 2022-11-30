@@ -111,6 +111,9 @@ def login(request):
         # 获取缓存信息
         user_key, user_dict = cache_get_by_id('user', 'user', user.id)
 
+        # 获取用户的历史记录
+
+
         result = {'result': 1, 'message': r"登录成功！", 'token': token, 'user': user_dict}
         return JsonResponse(result)
 

@@ -39,6 +39,7 @@ def active(request, token):
 
     # 获取用户信息
     try:
+        print(user_id)
         user_key, user_dict = cache_get_by_id('user', 'user', user_id)
     except Exception:
         # 返回修改成功的界面
@@ -51,12 +52,10 @@ def active(request, token):
         email = payload.get('email')
 
         # 防止同一邮箱反复激活
-        user_list = User.objects.filter(email=email)
-        for user in user_list:
-            if user.is_active:
-                content["title"] = "激活失败"
-                content["message"] = "啊偶，该用户已经被激活了！"
-                return render(request, 'EmailContent-check.html', content)
+        if User.objects.filter(email=email, is_active=True).exists():
+            content["title"] = "激活失败"
+            content["message"] = "啊偶，该邮箱已经被激活过啦，一个邮箱只能绑定一个用户哦！"
+            return render(request, 'EmailContent-check.html', content)
 
         # 激活用户 验证邮箱
         user_dict['is_active'] = True
