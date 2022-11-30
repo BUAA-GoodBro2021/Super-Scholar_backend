@@ -120,10 +120,15 @@ def cache_get_list_by_diophila(request_body_json):
                                                      sort=request_body_json['params'].get('sort', None),
                                                      per_page=int(request_body_json['params'].get('per_page', 25)),
                                                      pages=[int(request_body_json['params'].get('page', 1)), ]))
-
             # 自己作品列表长度
             value_length = len(value[0]['results'])
             for i in range(value_length):
+                if value[0]['results'][i]['abstract_inverted_index'] != None:
+                    value[0]['results'][i]['abstract'] = get_work_abstract(
+                        value[0]['results'][i]['abstract_inverted_index'])
+                else:
+                    value[0]['results'][i]['abstract'] = ""
+
                 # 如果 openAlex 信息中没有原文
                 if not value[0]['results'][i]['open_access'].get('is_oa', False):
                     try:
@@ -233,8 +238,13 @@ def cache_get_single_by_diophila(request_body_json):
             work_id = request_body_json['params']['id']
             # 获取论文主要信息
             value = open_alex.get_single_work(work_id)
+
             # 根据倒排索引获得摘要
-            value['abstract'] = get_work_abstract(value['abstract_inverted_index'])
+            if value['abstract_inverted_index'] != None:
+                value['abstract'] = get_work_abstract(value['abstract_inverted_index'])
+            else:
+                value['abstract'] = ""
+
             # 如果 openAlex 信息中没有原文
             if not value['open_access'].get('is_oa', False):
                 try:
