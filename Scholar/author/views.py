@@ -55,11 +55,7 @@ def get_relate_net(request):
 
         author_works = cache_get_list_by_diophila(request_body_json)
 
-        # print(len(author_works[0]['results']))
-        # # print(author_works[0]['results'][0])
-        # print(author_works[0]['results'][0]['authorships'])
-        # print(len(author_works[0]['results'][0]['authorships']))
-        # print(author_works[0]['results'][0]['authorships'][0])
+
         cooperation_author_count = 0
         cooperation_author_list = []
         for work in author_works[0]['results']:
@@ -72,7 +68,7 @@ def get_relate_net(request):
                 continue
             else:
                 for author in author_list:
-                    if author['author']['id'] == author_id:
+                    if author['author']['id'].split('/')[-1] == author_id:
                         continue
                     else:
                         co_author_name = author["author"]["display_name"]
