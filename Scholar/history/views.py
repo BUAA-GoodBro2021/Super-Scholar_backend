@@ -28,6 +28,8 @@ def update_history(request):
 
         # 修改数据库
         celery_update_history.delay(user_id, history_list_string)
+        result = {'result': 1, 'message': r"更新历史记录成功！", "history_list": history_list}
+        return JsonResponse(result)
 
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
