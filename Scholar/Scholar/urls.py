@@ -30,6 +30,7 @@ urlpatterns = [
     path('work/', include('work.urls')),
     path('message/', include('message.urls')),
     path('author/', include('author.urls')),
+    path('history/', include('history.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
