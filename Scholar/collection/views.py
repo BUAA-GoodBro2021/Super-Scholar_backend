@@ -74,7 +74,7 @@ def change_package_name(request):
             result = {'result': 0, 'message': r'收藏夹名不存在!'}
             return JsonResponse(result)
 
-        # 两次命名相同
+        # 两次命名不相同
         if package.name != package_name:
             i = 1
             # 寻找重复名称进行修改
@@ -89,8 +89,11 @@ def change_package_name(request):
             cp_key, cp_dict = cache_get_by_id('collection', 'collectionpackage', package_id)
             # 修改缓存信息
             cp_dict['name'] = package_name
+            cache.set(cp_key, cp_dict)
+
             # 同步数据库
             celery_change_package_name.delay(package_id, package_name)
+        # 两次命名相同
         else:
             cp_dict = package.to_dic()
 
@@ -149,7 +152,10 @@ def cancel_work(request):
         # 获取表单信息
         data_json = json.loads(request.body.decode())
         user_id = request.user_id
-        work_id = data_json.get('work_id')
+
+        work_id_list = data_json.get('work_id_list', [])
+        print(work_id_list)
+
         package_id = data_json.get('package_id', '-1')
 
         # 尝试获取收藏夹信息
@@ -164,17 +170,19 @@ def cancel_work(request):
             result = {'result': 0, 'message': r"您没有权限！"}
             return JsonResponse(result)
 
-        if work_id not in package_dict['works']:
-            result = {'result': 0, 'message': r"您已将其移出收藏夹！"}
-            return JsonResponse(result)
+        for work_id in work_id_list:
+            if work_id not in package_dict['works']:
+                result = {'result': 0, 'message': r"您已将其移出收藏夹！"}
+                return JsonResponse(result)
 
         # 修改缓存
-        package_dict['works'].remove(work_id)
-        package_dict['sum'] -= 1
-        cache.set(package_key, package_dict)
+        for work_id in work_id_list:
+            package_dict['works'].remove(work_id)
+            package_dict['sum'] -= 1
+            cache.set(package_key, package_dict)
 
-        # 修改数据库
-        celery_cancel_collect.delay(package_id, work_id)
+            # 修改数据库
+            celery_cancel_collect.delay(package_id, work_id)
 
         result = {'result': 1, 'message': r"取消收藏成功！", 'collection_package': package_dict}
         return JsonResponse(result)
@@ -190,26 +198,32 @@ def delete_collection_package(request):
         # 获取表单信息
         data_json = json.loads(request.body.decode())
         user_id = request.user_id
-        package_id = int(data_json.get('package_id', '-1'))
+
+        package_id_list = data_json.get('package_id_list', [])
+        print(package_id_list)
 
         # 获取当前用户建立的所有收藏夹
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
 
+        print(package_id_list)
         print(user_dic['collection_id_list'])
         # 异常处理
-        if package_id not in user_dic['collection_id_list']:
-            result = {'result': 0, 'message': r"文件夹已删除！"}
-            return JsonResponse(result)
+        for package_id in package_id_list:
+            if package_id not in user_dic['collection_id_list']:
+                result = {'result': 0, 'message': r"文件夹已删除！"}
+                return JsonResponse(result)
 
-        package_key = 'collection:collection_package:' + str(package_id)
-        # 修改缓存
-        cache.delete(package_key)
+        for package_id in package_id_list:
+            package_key = 'collection:collection_package:' + str(package_id)
+            # 修改缓存
+            cache.delete(package_key)
 
-        user_dic['collection_id_list'].remove(package_id)
+            user_dic['collection_id_list'].remove(package_id)
+
+            # 修改数据库
+            celery_delete_collection_package.delay(package_id, user_id)
+
         cache.set(user_key, user_dic)
-
-        # 修改数据库
-        celery_delete_collection_package.delay(package_id, user_id)
 
         result = {'result': 1, 'message': r"删除成功！"}
         return JsonResponse(result)
