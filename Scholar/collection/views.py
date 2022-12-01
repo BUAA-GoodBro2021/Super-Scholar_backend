@@ -200,9 +200,9 @@ def delete_collection_package(request):
         data_json = json.loads(request.body.decode())
         user_id = request.user_id
 
-        package_id_list = eval(data_json.get('package_id_list', '[]'))
+        package_id_list = data_json.get('package_id_list', [])
         print(package_id_list)
-        package_id_list = list(map(int, package_id_list))
+        #package_id_list = list(map(int, package_id_list))
 
         # 获取当前用户建立的所有收藏夹
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
