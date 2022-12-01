@@ -153,8 +153,7 @@ def cancel_work(request):
         data_json = json.loads(request.body.decode())
         user_id = request.user_id
 
-        work_id_list = data_json.get('work_id_list', '[]')
-        work_id_list = eval(work_id_list)
+        work_id_list = data_json.get('work_id_list', [])
         print(work_id_list)
 
         package_id = data_json.get('package_id', '-1')
@@ -202,7 +201,6 @@ def delete_collection_package(request):
 
         package_id_list = data_json.get('package_id_list', [])
         print(package_id_list)
-        #package_id_list = list(map(int, package_id_list))
 
         # 获取当前用户建立的所有收藏夹
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
