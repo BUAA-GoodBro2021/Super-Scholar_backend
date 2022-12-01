@@ -75,10 +75,8 @@ def active(request, token):
         cache_set_after_create('message', 'message', message.id, message.to_dic())  # 添加message缓存
 
         # 同步mysql
+        celery_add_unread_message_count(user_id)
         celery_activate_user.delay(user_id, email, avatar_url)
-        celery_add_user_message_id_list.delay(user_id, message.id)
-
-        # TODO 发送站内信
 
         # 返回注册成功的界面
         content["title"] = "感谢注册"
@@ -96,7 +94,7 @@ def active(request, token):
         cache.set(message_id_list_key, message_id_list_dic)
 
         # 同步站内信
-        celery_add_unread_message_count(user_id)
+        celery_add_user_message_id_list.delay(user_id, message.id)
 
         try:
             history = History.objects.create(id=int(user_id))
@@ -124,7 +122,7 @@ def active(request, token):
         user.save()
 
         # 发送站内信
-        message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=5)
+        message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=6)
 
         # 同步缓存
         user_dict['unread_message_count'] = user_dict['unread_message_count'] + 1  # 更新被评论用户的未读信息
