@@ -62,6 +62,10 @@ def user_upload_pdf(request):  # 用户上传pdf
         result = {'result': 0, 'message': r"上传失败！"}
         return JsonResponse(result)
     this_work.url = url
+
+    # 清空缓存
+    clear_cache_about_pdf()
+
     cache_set_after_create('work', 'work', this_work.id, this_work.to_dic())
 
     celery_save_pdf_url.delay(this_work.id, url)
@@ -114,6 +118,9 @@ def user_re_upload_pdf(request):  # 用户再次上传pdf
         os.remove(os.path.join(BASE_DIR, "media/" + pdf.name))
         result = {'result': 0, 'message': r"上传失败！"}
         return JsonResponse(result)
+
+    # 清空缓存
+    clear_cache_about_pdf()
 
     work_dic['last_user_id'] = work_dic['user_id']
     work_dic['last_author_id'] = work_dic['author_id']
@@ -209,7 +216,9 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
         celery_change_pdf_upload_form_has.delay(work_id)
 
     elif deal_result == -1:
+
         clear_cache_about_pdf()
+
         this_message = Message.objects.create(send_id=0, receiver_id=work_dic['user_id'], message_type=2,
                                               work_open_alex_id=work_dic['id'], work_name=work_dic['work_name'],
                                               pdf=work_dic['pdf'], url=work_dic['url'])
