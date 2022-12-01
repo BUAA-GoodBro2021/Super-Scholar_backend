@@ -10,6 +10,7 @@ class History(models.Model):
 
     def to_dic(self):
         history_list = self.history_list.split('|')
+        history_list = [history_list_info for history_list_info in history_list if history_list_info != ""]
         return {
             'id': self.id,
             'history_list': history_list,

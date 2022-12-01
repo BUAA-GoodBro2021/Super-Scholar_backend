@@ -39,7 +39,6 @@ def active(request, token):
 
     # 获取用户信息
     try:
-        print(user_id)
         user_key, user_dict = cache_get_by_id('user', 'user', user_id)
     except Exception:
         # 返回修改成功的界面
