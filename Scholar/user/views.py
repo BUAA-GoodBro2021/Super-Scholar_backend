@@ -193,12 +193,12 @@ def edit_introduction(request):
             result = {'result': 0, 'message': r"用户名的长度不能为0！"}
             return JsonResponse(result)
 
-        if User.objects.filter(username=username, is_active=True).exists():
-            result = {'result': 0, 'message': r'用户已存在!'}
-            return JsonResponse(result)
-
         # 获取信息
         user_key, user_dict = cache_get_by_id('user', 'user', user_id)
+
+        if User.objects.filter(username=username, is_active=True).exists() and user_dict['username'] != username:
+            result = {'result': 0, 'message': r'用户已存在!'}
+            return JsonResponse(result)
 
         # 修改信息，同步缓存
         user_dict['username'] = username
