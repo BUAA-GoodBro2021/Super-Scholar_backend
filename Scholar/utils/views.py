@@ -74,14 +74,9 @@ def active(request, token):
 
         cache_set_after_create('message', 'message', message.id, message.to_dic())  # 添加message缓存
 
-        message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
-        message_id_list_dic['message_id_list'].append(message.id)
-        cache.set(message_id_list_key, message_id_list_dic)
-
         # 同步mysql
         celery_activate_user.delay(user_id, email, avatar_url)
         celery_add_user_message_id_list.delay(user_id, message.id)
-        celery_add_unread_message_count(user_id)
 
         # TODO 发送站内信
 
@@ -94,6 +89,14 @@ def active(request, token):
             return JsonResponse({'result': 0, 'message': '不能重复点击哦'})
         cache_set_after_create('message', 'usermessageidlist', this_UserMessageIdList.id,
                                this_UserMessageIdList.to_dic())
+
+        # 同步站内信列表缓存
+        message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
+        message_id_list_dic['message_id_list'].append(message.id)
+        cache.set(message_id_list_key, message_id_list_dic)
+
+        # 同步站内信
+        celery_add_unread_message_count(user_id)
 
         try:
             history = History.objects.create(id=int(user_id))
