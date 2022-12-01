@@ -15,7 +15,7 @@ def update_history(request):
         # 获取表单信息
         data_json = json.loads(request.body.decode())
 
-        history_list = data_json.get('history_list', "")
+        history_list = data_json.get('history_list', [])
         history_key, history_dict = cache_get_by_id('history', 'history', user_id)
 
         history_list = [history_list_info for history_list_info in history_list if history_list_info != ""]
