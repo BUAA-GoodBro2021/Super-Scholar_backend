@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 import random
 
+from form.tasks import celery_add_unread_message_count, celery_add_user_message_id_list
 from history.models import History
 from properties import *
 from utils.tasks import *
@@ -62,11 +63,25 @@ def active(request, token):
 
         # 设置随机头像
         avatar_url = default_avatar_url_match + str(random.choice(range(1, 31))) + '.png'
-        user_dict['avatar_url'] = avatar_url
+
+        # 发送站内信
+        message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=5)
+
         # 同步缓存
+        user_dict['avatar_url'] = avatar_url
+        user_dict['unread_message_count'] = user_dict['unread_message_count'] + 1  # 更新被评论用户的未读信息
         cache.set(user_key, user_dict)
+
+        cache_set_after_create('message', 'message', message.id, message.to_dic())  # 添加message缓存
+
+        message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
+        message_id_list_dic['message_id_list'].append(message.id)
+        cache.set(message_id_list_key, message_id_list_dic)
+
         # 同步mysql
         celery_activate_user.delay(user_id, email, avatar_url)
+        celery_add_user_message_id_list.delay(user_id, message.id)
+        celery_add_unread_message_count(user_id)
 
         # TODO 发送站内信
 
@@ -94,7 +109,7 @@ def active(request, token):
         return render(request, 'EmailContent-check.html', content)
 
     # 重设密码
-    if 'password' in payload.keys():
+    elif 'password' in payload.keys():
         password = payload.get('password')
         email = payload.get('email')
 
@@ -105,7 +120,22 @@ def active(request, token):
         user.password = password
         user.save()
 
-        # TODO 发送站内信
+        # 发送站内信
+        message = Message.objects.create(send_id=0, receiver_id=user_id, message_type=5)
+
+        # 同步缓存
+        user_dict['unread_message_count'] = user_dict['unread_message_count'] + 1  # 更新被评论用户的未读信息
+        cache.set(user_key, user_dict)
+
+        cache_set_after_create('message', 'message', message.id, message.to_dic())  # 添加message缓存
+
+        message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
+        message_id_list_dic['message_id_list'].append(message.id)
+        cache.set(message_id_list_key, message_id_list_dic)
+
+        # 同步mysql
+        celery_add_user_message_id_list.delay(user_id, message.id)
+        celery_add_unread_message_count(user_id)
 
         # 返回修改成功的界面
         content["title"] = "修改成功"

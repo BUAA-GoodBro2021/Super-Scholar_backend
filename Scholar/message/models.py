@@ -19,7 +19,7 @@ class Message(models.Model):
 
     message_type = models.IntegerField(
         '消息的类型',
-        default=-1)  # -1表示管理员解除用户的门户，0表示管理员拒绝用户的申请门户，1表示管理员同意用户的申请门户，2表示管理员拒绝了用户的上传pdf申请，3表示管理员同意了用户的上传pdf申请,4表示评论消息
+        default=-1)  # -1表示管理员解除用户的门户，0表示管理员拒绝用户的申请门户，1表示管理员同意用户的申请门户，2表示管理员拒绝了用户的上传pdf申请，3表示管理员同意了用户的上传pdf申请,4表示评论消息,5表示用户成功注册,6表示用户成功修改密码
 
     author_id = models.CharField('用户申请的作者的open_alex的id', max_length=1024, default='')
     real_name = models.CharField('用户申请的作者的open_alex的name', max_length=1024, default='')
@@ -39,7 +39,7 @@ class Message(models.Model):
             'id': self.id,
             'send_id': self.send_id,
             'message_type': self.message_type,
-            # 0表示管理S员拒绝用户的申请门户，1表示管理员同意用户的申请门户，2表示管理员拒绝了用户的上传pdf申请，3表示管理员同意了用户的上传pdf申请,4表示评论消息
+            # 0表示管理S员拒绝用户的申请门户，1表示管理员同意用户的申请门户，2表示管理员拒绝了用户的上传pdf申请，3表示管理员同意了用户的上传pdf申请,4表示评论消息,5表示用户成功注册,6表示用户成功修改密码
             'content': self.content,
             'work_name': self.work_name,
             'reply': self.reply,
