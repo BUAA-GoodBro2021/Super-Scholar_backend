@@ -86,15 +86,15 @@ class FollowOfUser(models.Model):
 
 class CollectionOfUser(models.Model):
     id = models.IntegerField('用户的id', primary_key=True, default=0)  # user_id
-    collection_id_list = models.TextField('用户收藏夹的id列表', max_length=20000, default='')
+    collection_id_list = models.TextField('用户收藏夹的id列表', max_length=20000, default='[]')
 
     class Meta:
         db_table = 'scholar_collection_of_user'
 
     def to_dic(self):
-        collection_id_list = self.collection_id_list.split(' ')
-        collection_id_list = [int(collection_id) for collection_id in collection_id_list if collection_id != '']
+        collection_id_list = eval(self.collection_id_list)
         print(collection_id_list)
+
         return {
             'user_id': self.id,
             'collection_id_list': collection_id_list,

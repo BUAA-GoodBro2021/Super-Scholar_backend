@@ -88,6 +88,7 @@ def register(request):
         message = check_legal(password1)
         if message['result'] != 1:
             return JsonResponse(message)
+
         user = User.objects.create(
             username=username,
             email=email,
@@ -95,8 +96,6 @@ def register(request):
             is_active=False
         )
 
-        # 创建该用户的收藏夹
-        CollectionOfUser.objects.create(id=user.id)
 
         payload = {'user_id': user.id, 'email': email}
 

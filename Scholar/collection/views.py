@@ -41,7 +41,7 @@ def add_collection_package(request):
         user_dic['collection_id_list'].append(cp.id)
         cache.set(user_key, user_dic)
 
-        add_collection_package_delay.delay(cp.id, user_id)
+        add_collection_package_delay(cp.id, user_id)
 
         result = {'result': 1, 'message': r"添加成功！", 'collection_package': cp.to_dic()}
         return JsonResponse(result)
@@ -204,9 +204,8 @@ def delete_collection_package(request):
 
         # 获取当前用户建立的所有收藏夹
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
-
-        print(package_id_list)
         print(user_dic['collection_id_list'])
+
         # 异常处理
         for package_id in package_id_list:
             if package_id not in user_dic['collection_id_list']:
@@ -214,14 +213,15 @@ def delete_collection_package(request):
                 return JsonResponse(result)
 
         for package_id in package_id_list:
+            print(package_id)
             package_key = 'collection:collection_package:' + str(package_id)
             # 修改缓存
             cache.delete(package_key)
 
             user_dic['collection_id_list'].remove(package_id)
 
-            # 修改数据库
-            celery_delete_collection_package.delay(package_id, user_id)
+        # 修改数据库
+        celery_delete_collection_package.delay(package_id_list, user_id)
 
         cache.set(user_key, user_dic)
 
@@ -244,6 +244,7 @@ def get_collection_package_list(request):
         package_list = []
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
         package_id_list = user_dic['collection_id_list']
+        print(package_id_list)
 
         for package_id in package_id_list:
             package_key, package_dic = cache_get_by_id('collection', 'collectionpackage', package_id)

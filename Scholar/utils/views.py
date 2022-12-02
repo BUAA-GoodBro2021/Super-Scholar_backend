@@ -5,6 +5,7 @@ import random
 from form.tasks import celery_add_unread_message_count, celery_add_user_message_id_list
 from history.models import History
 from properties import *
+from user.models import CollectionOfUser
 from utils.tasks import *
 from utils.Login_utils import *
 from utils.Redis_utils import *
@@ -100,8 +101,12 @@ def active(request, token):
             history = History.objects.create(id=int(user_id))
         except:
             return JsonResponse({'result': 0, 'message': '不能重复点击哦'})
+
         # 创建每一个人的历史记录
         cache_set_after_create('history', 'history', history.id, history.to_dic())
+
+        # 创建每个人的收藏夹
+        CollectionOfUser.objects.create(id=user_id)
 
         user_id_list_key, user_id_list_dic = cache_get_by_id('user', 'userlist', 0)
         user_id_list_dic['id_list'].append(int(user_id))

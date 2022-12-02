@@ -28,5 +28,6 @@ class CollectionPackage(models.Model):
             'is_active': self.is_active,
         }
 
+
     class Meta:
         db_table = 'scholar_collection_package'
