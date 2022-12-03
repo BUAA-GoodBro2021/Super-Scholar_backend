@@ -73,29 +73,23 @@ def register(request):
             return JsonResponse(result)
 
         if User.objects.filter(username=username, is_active=True).exists():
-            result = {
-                'result': 0,
-                'message': r'用户已存在!'
-            }
+            result = {'result': 0, 'message': r'该用户名已存在!'}
+            return JsonResponse(result)
+
+        if User.objects.filter(email=email, is_active=True).exists():
+            result = {'result': 0, 'message': r'该邮箱已存在!'}
             return JsonResponse(result)
 
         if password1 != password2:
-            result = {
-                'result': 0,
-                'message': r'两次密码不一致!'
-            }
+            result = {'result': 0, 'message': r'两次密码不一致!'}
             return JsonResponse(result)
+
         message = check_legal(password1)
+
         if message['result'] != 1:
             return JsonResponse(message)
 
-        user = User.objects.create(
-            username=username,
-            email=email,
-            password=hash_encode(password1),
-            is_active=False
-        )
-
+        user = User.objects.create(username=username, email=email, password=hash_encode(password1), is_active=False)
 
         payload = {'user_id': user.id, 'email': email}
 
