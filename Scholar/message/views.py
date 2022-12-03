@@ -15,6 +15,7 @@ def look_message_list(request):
     data_json = json.loads(request.body.decode())
     print(data_json)
     user_id = request.user_id
+    print(user_id)
     message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
     user_key, user_dic = cache_get_by_id('user', 'user', user_id)
     user_dic['unread_message_count'] = 0
@@ -65,3 +66,63 @@ def look_unread_message_count(request):
     user_key, user_dic = cache_get_by_id('user', 'user', user_id)
     return JsonResponse(
         {'result': 1, 'message': '获取未读消息个数成功', 'unread_message_count': user_dic['unread_message_count']})
+
+
+def message_test_send(request):
+    if request.method == 'POST':
+        data_json = json.loads(request.body.decode())
+        send_id = int(data_json.get('send_id', 0))
+        receiver_id = int(data_json.get('receiver_id', 0))
+        message_type = int(data_json.get('message_type', 0))
+        author_id = data_json.get('author_id', '')
+        real_name = data_json.get('real_name', '')
+        institution = data_json.get('institution', '')
+        work_name = data_json.get('work_name', '')
+        work_open_alex_id = data_json.get('work_open_alex_id', '')
+        content = data_json.get('content', '')
+        reply = data_json.get('reply', '')
+        pdf = data_json.get('pdf', '')
+        url = data_json.get('url', '')
+
+        message = Message.objects.create(
+            send_id=send_id,
+            receiver_id=receiver_id,
+            message_type=message_type,
+            author_id=author_id,
+            real_name=real_name,
+            institution=institution,
+            work_name=work_name,
+            work_open_alex_id=work_open_alex_id,
+            content=content,
+            reply=reply,
+            pdf=pdf,
+            url=url
+        )
+        user = User.objects.get(id=receiver_id)
+
+        user_key, user_dic = cache_get_by_id('user', 'user', receiver_id)
+        user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1  # 更新被评论用户的未读信息
+        cache.set(user_key, user_dic)
+
+        message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', receiver_id)
+        message_id_list_dic['message_id_list'].append(message.id)
+        cache.set(message_id_list_key, message_id_list_dic)
+
+        user_message_list = UserMessageIdList.objects.get(id=user.id)
+        message_id_list = eval(user_message_list.message_id_list)
+        message_id_list.append(message.id)
+        user_message_list.message_id_list = str(message_id_list)
+        user_message_list.save()
+
+        user.unread_message_count += 1
+        user.save()
+        result = {
+            'result': 1,
+            'message': message.to_dic(),
+            'user_message_list': user_message_list.message_id_list
+        }
+        return JsonResponse(result)
+
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
