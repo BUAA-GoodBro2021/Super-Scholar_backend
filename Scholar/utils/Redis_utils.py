@@ -108,6 +108,15 @@ def cache_del_by_id(app_label, model_name, model_id):
 def cache_get_list_by_diophila(request_body_json):
     # 创建一个 OpenAlex 对象
     open_alex = OpenAlex(open_alex_mailto_email)
+    # 处理排序字段，使其符合 openAlex 的排序要求
+    sort_param = request_body_json['params'].get('sort', None).copy()
+    # 如果非空
+    if sort_param is not None:
+        # 如果多级排序中既有升序也有降序
+        if 'asc' in sort_param.values() and 'desc' in sort_param.values():
+            for key, value in sort_param.items():
+                if value != 'desc':
+                    request_body_json['params']['sort'].pop(key)
     # 生成缓存键
     key = json.dumps(request_body_json)
     # 获取查询结果
@@ -176,6 +185,15 @@ def cache_get_list_by_diophila(request_body_json):
 def cache_get_groups_by_diophila(request_body_json):
     # 创建一个 OpenAlex 对象
     open_alex = OpenAlex(open_alex_mailto_email)
+    # 处理排序字段，使其符合 openAlex 的排序要求
+    sort_param = request_body_json['params'].get('sort', None).copy()
+    # 如果非空
+    if sort_param is not None:
+        # 如果多级排序中既有升序也有降序
+        if 'asc' in sort_param.values() and 'desc' in sort_param.values():
+            for key, value in sort_param.items():
+                if value != 'desc':
+                    request_body_json['params']['sort'].pop(key)
     # 生成缓存键
     key = json.dumps(request_body_json)
     # 获取查询结果
