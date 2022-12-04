@@ -108,15 +108,30 @@ def cache_del_by_id(app_label, model_name, model_id):
 def cache_get_list_by_diophila(request_body_json):
     # 创建一个 OpenAlex 对象
     open_alex = OpenAlex(open_alex_mailto_email)
+    # 处理筛选器字段，使其符合 openAlex 的筛选要求
+    if request_body_json['params'].get('filter', None) is not None:
+        filter_param = request_body_json['params'].get('filter', None).copy()
+        # 如果筛选器字段中存在值为空字符串的键值对
+        for key, value in filter_param.items():
+            if value == '':
+                request_body_json['params']['filter'].pop(key)
+        if len(request_body_json['params']['filter']) == 0:
+            request_body_json['params'].pop('filter')
+
     # 处理排序字段，使其符合 openAlex 的排序要求
-    # 如果非空
     if request_body_json['params'].get('sort', None) is not None:
         sort_param = request_body_json['params'].get('sort', None).copy()
+        # 如果排序器字段中存在值为空字符串的键值对
+        for key, value in sort_param.items():
+            if value == '':
+                request_body_json['params']['sort'].pop(key)
         # 如果多级排序中既有升序也有降序
         if 'asc' in sort_param.values() and 'desc' in sort_param.values():
             for key, value in sort_param.items():
                 if value != 'desc':
                     request_body_json['params']['sort'].pop(key)
+        if len(request_body_json['params']['sort']) == 0:
+            request_body_json['params'].pop('sort')
     # 生成缓存键
     key = json.dumps(request_body_json)
     # 获取查询结果
@@ -185,15 +200,30 @@ def cache_get_list_by_diophila(request_body_json):
 def cache_get_groups_by_diophila(request_body_json):
     # 创建一个 OpenAlex 对象
     open_alex = OpenAlex(open_alex_mailto_email)
+    # 处理筛选器字段，使其符合 openAlex 的筛选要求
+    if request_body_json['params'].get('filter', None) is not None:
+        filter_param = request_body_json['params'].get('filter', None).copy()
+        # 如果筛选器字段中存在值为空字符串的键值对
+        for key, value in filter_param.items():
+            if value == '':
+                request_body_json['params']['filter'].pop(key)
+        if len(request_body_json['params']['filter']) == 0:
+            request_body_json['params'].pop('filter')
+
     # 处理排序字段，使其符合 openAlex 的排序要求
-    # 如果非空
     if request_body_json['params'].get('sort', None) is not None:
         sort_param = request_body_json['params'].get('sort', None).copy()
+        # 如果排序器字段中存在值为空字符串的键值对
+        for key, value in sort_param.items():
+            if value == '':
+                request_body_json['params']['sort'].pop(key)
         # 如果多级排序中既有升序也有降序
         if 'asc' in sort_param.values() and 'desc' in sort_param.values():
             for key, value in sort_param.items():
                 if value != 'desc':
                     request_body_json['params']['sort'].pop(key)
+        if len(request_body_json['params']['sort']) == 0:
+            request_body_json['params'].pop('sort')
     # 生成缓存键
     key = json.dumps(request_body_json)
     # 获取查询结果
@@ -237,6 +267,17 @@ def cache_get_groups_by_diophila(request_body_json):
                                                      search=request_body_json['params'].get('search', None),
                                                      sort=request_body_json['params'].get('sort', None),
                                                      group_by=request_body_json['params'].get('group_by', None))
+        # 将 unknown 的去除，同时对于key中只留ID
+        unknown_location = 0
+        for i in range(request_body_json['params']['group_by']):
+            # 去除 unknown
+            if request_body_json['params']['group_by'][i]['key'] == 'unknown':
+                unknown_location = i
+            # 只留 OpenAlexId
+            elif request_body_json['params']['group_by'][i]['key'].find("https://"):
+                request_body_json['params']['group_by'][i]['key'] = \
+                    request_body_json['params']['group_by'][i]['key'].split('/')[-1]
+        request_body_json['params']['group_by'].remove(unknown_location)
         cache.set(key, value)
     return value
 
