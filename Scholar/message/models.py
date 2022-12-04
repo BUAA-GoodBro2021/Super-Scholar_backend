@@ -17,9 +17,15 @@ class Message(models.Model):
     receiver_id = models.IntegerField('接受者的用户id', default=0)
     send_time = models.DateTimeField('发送时间', auto_now_add=True)
 
-    message_type = models.IntegerField(
-        '消息的类型',
-        default=-1)  # -1表示管理员解除用户的门户，0表示管理员拒绝用户的申请门户，1表示管理员同意用户的申请门户，2表示管理员拒绝了用户的上传pdf申请，3表示管理员同意了用户的上传pdf申请,4表示评论消息,5表示用户成功注册,6表示用户成功修改密码
+    message_type = models.IntegerField('消息的类型', default=-1)
+    # -1表示管理员解除用户的门户
+    # 0表示管理员拒绝用户的申请门户
+    # 1表示管理员同意用户的申请门户
+    # 2表示管理员拒绝了用户的上传pdf申请
+    # 3表示管理员同意了用户的上传pdf申请
+    # 4表示评论消息
+    # 5表示用户成功注册
+    # 6表示用户成功修改密码
 
     author_id = models.CharField('用户申请的作者的open_alex的id', max_length=1024, default='')
     real_name = models.CharField('用户申请的作者的open_alex的name', max_length=1024, default='')
