@@ -69,19 +69,15 @@ class User(models.Model):
 
 class FollowOfUser(models.Model):
     id = models.IntegerField('用户的id', primary_key=True, default=0)  # user_id
-    follow_id_list = models.TextField('被关注人的id列表', max_length=20000, default='')
+    follow_id_list = models.TextField('被关注人的id列表', max_length=20000, default='[]')
 
     class Meta:
         db_table = 'scholar_follow_of_user'
 
     def to_dic(self):
-        follow_id_list = self.follow_id_list.split('#')
-        follow_id_list = [follow_id for follow_id in follow_id_list if follow_id != '']
+        follow_id_list = eval(self.follow_id_list)
         print(follow_id_list)
-        return {
-            'user_id': self.id,
-            'follow_id_list': follow_id_list,
-        }
+        return {'user_id': self.id, 'follow_id_list': follow_id_list}
 
 
 class CollectionOfUser(models.Model):
@@ -95,7 +91,4 @@ class CollectionOfUser(models.Model):
         collection_id_list = eval(self.collection_id_list)
         print(collection_id_list)
 
-        return {
-            'user_id': self.id,
-            'collection_id_list': collection_id_list,
-        }
+        return {'user_id': self.id, 'collection_id_list': collection_id_list}

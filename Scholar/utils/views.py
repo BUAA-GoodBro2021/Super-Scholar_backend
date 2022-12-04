@@ -5,7 +5,7 @@ import random
 from form.tasks import celery_add_unread_message_count, celery_add_user_message_id_list
 from history.models import History
 from properties import *
-from user.models import CollectionOfUser
+from user.models import CollectionOfUser, FollowOfUser
 from utils.tasks import *
 from utils.Login_utils import *
 from utils.Redis_utils import *
@@ -107,6 +107,9 @@ def active(request, token):
 
         # 创建每个人的收藏夹
         CollectionOfUser.objects.create(id=user_id)
+
+        # 创建每个人的关注
+        FollowOfUser.objects.create(id=user_id)
 
         user_id_list_key, user_id_list_dic = cache_get_by_id('user', 'userlist', 0)
         user_id_list_dic['id_list'].append(int(user_id))
