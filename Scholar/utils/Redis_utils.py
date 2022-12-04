@@ -205,6 +205,18 @@ def cache_get_groups_by_diophila(request_body_json):
                                                   search=request_body_json['params'].get('search', None),
                                                   sort=request_body_json['params'].get('sort', None),
                                                   group_by=request_body_json['params'].get('group_by', None))
+            # 如果对时间进行分组，只需要得到最早年份和最晚年份
+            if request_body_json['params']['group_by'] == 'publication_year':
+                min_year = 0x7fffffff
+                max_year = -1
+                for year_dict in value['group_by']:
+                    if min_year > int(year_dict['key']):
+                        min_year = int(year_dict['key'])
+                    if max_year < int(year_dict['key']):
+                        max_year = int(year_dict['key'])
+                value['meta']['min_year'] = min_year
+                value['meta']['max_year'] = max_year
+
         elif request_body_json['entity_type'] == 'authors':
             value = open_alex.get_groups_of_authors(filters=request_body_json['params'].get('filter', None),
                                                     search=request_body_json['params'].get('search', None),
