@@ -210,20 +210,9 @@ def cache_get_groups_by_diophila(request_body_json):
         if len(request_body_json['params']['filter']) == 0:
             request_body_json['params'].pop('filter')
 
-    # 处理排序字段，使其符合 openAlex 的排序要求
+    # 处理排序字段，使其符合 openAlex 的排序要求,分组中不能有排序器
     if request_body_json['params'].get('sort', None) is not None:
-        sort_param = request_body_json['params'].get('sort', None).copy()
-        # 如果排序器字段中存在值为空字符串的键值对
-        for key, value in sort_param.items():
-            if value == '':
-                request_body_json['params']['sort'].pop(key)
-        # 如果多级排序中既有升序也有降序
-        if 'asc' in sort_param.values() and 'desc' in sort_param.values():
-            for key, value in sort_param.items():
-                if value != 'desc':
-                    request_body_json['params']['sort'].pop(key)
-        if len(request_body_json['params']['sort']) == 0:
-            request_body_json['params'].pop('sort')
+        request_body_json['params'].pop('sort')
     # 生成缓存键
     key = json.dumps(request_body_json)
     # 获取查询结果
