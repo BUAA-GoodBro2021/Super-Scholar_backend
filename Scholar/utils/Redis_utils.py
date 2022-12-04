@@ -257,16 +257,16 @@ def cache_get_groups_by_diophila(request_body_json):
                                                      sort=request_body_json['params'].get('sort', None),
                                                      group_by=request_body_json['params'].get('group_by', None))
         # 将 unknown 的去除，同时对于key中只留ID
-        unknown_location = 0
-        for i in range(request_body_json['params']['group_by']):
+        unknown_location = -1
+        for i in range(len(value['group_by'])):
             # 去除 unknown
-            if request_body_json['params']['group_by'][i]['key'] == 'unknown':
+            if value['group_by'][i]['key'] == 'unknown':
                 unknown_location = i
             # 只留 OpenAlexId
-            elif request_body_json['params']['group_by'][i]['key'].find("https://"):
-                request_body_json['params']['group_by'][i]['key'] = \
-                    request_body_json['params']['group_by'][i]['key'].split('/')[-1]
-        request_body_json['params']['group_by'].remove(unknown_location)
+            elif value['group_by'][i]['key'].find("https://"):
+                value['group_by'][i]['key'] = value['group_by'][i]['key'].split('/')[-1]
+        if unknown_location != -1:
+            value['group_by'].pop(unknown_location)
         cache.set(key, value)
     return value
 
