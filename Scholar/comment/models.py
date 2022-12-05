@@ -34,14 +34,13 @@ class Comment(models.Model):
 
 class CommentOfWorks(models.Model):
     id = models.CharField('评论文章的id', primary_key=True, max_length=200, default="")  # work_id
-    comment_id_list = models.TextField('评论id', max_length=20000, default='')  # 其中只包含0级评论的id
+    comment_id_list = models.TextField('评论id', max_length=20000, default='[]')  # 其中只包含0级评论的id
 
     class Meta:
         db_table = 'scholar_comment_of_works'
 
     def to_dic(self):
-        comment_id_list = self.comment_id_list.split(' ')
-        comment_id_list = [int(comment_id) for comment_id in comment_id_list if comment_id != '']
+        comment_id_list = eval(self.comment_id_list)
         # print(comment_id_list)
         return {
             'work_id': self.id,
@@ -51,14 +50,13 @@ class CommentOfWorks(models.Model):
 
 class CommentOfComments(models.Model):
     id = models.IntegerField('回复的评论的id', primary_key=True, default=0)  # comment_id
-    comment_id_list = models.TextField('评论id', max_length=20000, default='')
+    comment_id_list = models.TextField('评论id', max_length=20000, default='[]')
 
     class Meta:
         db_table = 'scholar_comment_of_comments'
 
     def to_dic(self):
-        comment_id_list = self.comment_id_list.split(' ')
-        comment_id_list = [int(comment_id) for comment_id in comment_id_list if comment_id != '']
+        comment_id_list = eval(self.comment_id_list)
         # print(comment_id_list)
         return {
             'comment_id': self.id,

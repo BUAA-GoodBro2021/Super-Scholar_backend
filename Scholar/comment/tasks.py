@@ -6,29 +6,27 @@ from utils.Redis_utils import *
 @app.task
 def add_comment_of_work(comment_id, work_id):
     # 如果表中已有对当前work的记录，则直接获取；否则进行添加。
-    print("def add_comment_of_work")
     try:
         comment_of_work = CommentOfWorks.objects.get(id=work_id)
     except:
         comment_of_work = CommentOfWorks.objects.create(id=work_id)
 
-    comment_of_work.comment_id_list += ' ' + str(comment_id)
+    comment_id_list = eval(comment_of_work.comment_id_list)
+    comment_id_list.append(comment_id)
+    comment_of_work.comment_id_list = str(comment_id_list)
     comment_of_work.save()
     cache_set_after_create('comment', 'commentofworks', comment_of_work.id, comment_of_work.to_dic())
 
 
 @app.task
 def add_comment_of_comment(comment_id, father_comment_id):
-    # 如果表中已有对当前comment的记录，则直接获取；否则进行添加。
-    print("def add_comment_of_comment")
-    try:
-        comment_of_comment = CommentOfComments.objects.get(id=father_comment_id)
-    except:
-        comment_of_comment = CommentOfComments.objects.create(id=father_comment_id)
+    comment_of_comment = CommentOfComments.objects.get(id=father_comment_id)
 
-    comment_of_comment.comment_id_list += ' ' + str(comment_id)
+    comment_id_list = eval(comment_of_comment.comment_id_list)
+    comment_id_list.append(comment_id)
+    comment_of_comment.comment_id_list = str(comment_id_list)
+
     comment_of_comment.save()
-    cache_set_after_create('comment', 'commentofcomments', comment_of_comment.id, comment_of_comment.to_dic())
 
 
 @app.task
@@ -44,12 +42,9 @@ def delay_delete_comment(comment_id, work_id, comment_level):
 
         try:
             comment_of_work = CommentOfWorks.objects.get(id=work_id)
-            comment_list = comment_of_work.to_dic()['comment_id_list']
-            print(comment_list)
-
+            comment_list = eval(comment_of_work.comment_id_list)
             comment_list.remove(comment_id)
-            comment_list = ' '.join(map(str, comment_list))
-            comment_of_work.comment_id_list = comment_list
+            comment_of_work.comment_id_list = str(comment_list)
             comment_of_work.save()
 
 

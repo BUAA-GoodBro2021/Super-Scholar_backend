@@ -33,7 +33,19 @@ def add_comment(request):
         comment.ancestor_id = comment.id
         comment.save()
 
+        # 创建评论对应的回复评论列
+        CommentOfComments.objects.create(id=comment.id)
+
+        try:
+            CommentOfWorks.objects.get(id=work_id)
+        except:
+            CommentOfWorks.objects.create(id=work_id)
+
         # 更新缓存
+        comment_of_work_key, comment_of_work_dic = cache_get_by_id('comment', 'commentofworks', work_id)
+        comment_of_work_dic['comment_id_list'].append(comment.id)
+        cache.set(comment_of_work_key, comment_of_work_dic)
+
         cache_set_after_create("comment", "comment", comment.id, comment.to_dic())
 
         # 延迟更新数据库
@@ -114,18 +126,34 @@ def reply_comment(request):
         )
 
         # 更新缓存
-        reply_user_dic['unread_message_count'] = reply_user_dic['unread_message_count'] + 1  # 更新被评论用户的未读信息
+
+        # 更新被评论用户的未读信息
+        reply_user_dic['unread_message_count'] = reply_user_dic['unread_message_count'] + 1
         cache.set(reply_user_key, reply_user_dic)
 
-        cache_set_after_create('message', 'message', message.id, message.to_dic())  # 添加message缓存
-        cache_set_after_create("comment", "comment", comment.id, comment.to_dic())  # 添加comment缓存
+        # 添加message缓存
+        cache_set_after_create('message', 'message', message.id, message.to_dic())
 
+        # 添加comment缓存
+        cache_set_after_create("comment", "comment", comment.id, comment.to_dic())
+
+        # 更新用户的消息队列缓存
         message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', reply_user_id)
         message_id_list_dic['message_id_list'].append(message.id)
         cache.set(message_id_list_key, message_id_list_dic)
 
+        # 更新被回复评论的回复评论队列
+        father_reply_comment_key, father_reply_comment_dic = cache_get_by_id('comment', 'commentofcomments', comment_id)
+        father_reply_comment_dic['comment_id_list'].append(comment.id)
+        cache.set(father_reply_comment_key, father_reply_comment_dic)
+
+        # 创建评论的回复评论序列
+        reply_comments = CommentOfComments.objects.create(id=comment.id)
+        cache_set_after_create("comment", "commentofcomments", reply_comments.id, reply_comments.to_dic())
+
         # 延迟更新数据库
         add_comment_of_comment.delay(comment.id, comment_id)
+
         celery_add_user_message_id_list.delay(reply_user_id, message.id)
         celery_add_unread_message_count(reply_user_id)
 
