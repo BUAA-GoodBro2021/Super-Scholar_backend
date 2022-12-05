@@ -59,6 +59,11 @@ def delay_delete_comment(comment_id, work_id, comment_level):
 
         try:
             comments = Comment.objects.filter(ancestor_id=comment_id).all()
+
+            for reply_comment in comments:
+                comment_of_comment = CommentOfComments.objects.get(id=reply_comment)
+                comment_of_comment.delete()
+
             comments.delete()
         except:
             print("Can't find the son_comments!")
