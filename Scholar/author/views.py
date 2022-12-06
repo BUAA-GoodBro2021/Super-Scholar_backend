@@ -93,6 +93,7 @@ def get_relate_net(request):
                                 }
                                 cooperation_author_list.append(co_author)
                     except:
+                        print(author)
                         continue
         quickSort(cooperation_author_list, 0, cooperation_author_count - 1)
         return JsonResponse(

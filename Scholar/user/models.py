@@ -50,7 +50,7 @@ class User(models.Model):
             'user_id': self.id,
             'username': self.username,
             'email': self.email,
-
+            'introduction': self.introduction,
             "avatar_url": self.avatar_url,
 
             'is_active': self.is_active,
