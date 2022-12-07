@@ -60,6 +60,10 @@ def register(request):
     请求体包含包含 username，password1，password2，email
     """
     if request.method == 'POST':
+
+        result = {'result': 0, 'message': r"正在内测中, 暂时不对外开放注册！"}
+        return JsonResponse(result)
+
         data_json = json.loads(request.body.decode())
         print(data_json)
 
