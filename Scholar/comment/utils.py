@@ -42,8 +42,11 @@ def get_all_comments_by_comment_id(comment_id):
 def get_all_comments_by_work_id(work_id):
     # 获取当前论文下的所有评论。
     all_comments = []
-    key, comment_of_work_dic = cache_get_by_id('comment', 'commentofworks', work_id)
 
+    try:
+        key, comment_of_work_dic = cache_get_by_id('comment', 'commentofworks', work_id)
+    except:
+        return all_comments
     # 获得当前论文的所有评论
     comment_id_list = comment_of_work_dic['comment_id_list']
 

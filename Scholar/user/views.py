@@ -80,9 +80,9 @@ def register(request):
             result = {'result': 0, 'message': r'该用户名已存在!'}
             return JsonResponse(result)
 
-        if User.objects.filter(email=email, is_active=True).exists():
-            result = {'result': 0, 'message': r'该邮箱已存在!'}
-            return JsonResponse(result)
+        # if User.objects.filter(email=email, is_active=True).exists():
+        #     result = {'result': 0, 'message': r'该邮箱已存在!'}
+        #     return JsonResponse(result)
 
         if password1 != password2:
             result = {'result': 0, 'message': r'两次密码不一致!'}
