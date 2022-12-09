@@ -167,6 +167,14 @@ def cache_get_list_by_diophila(request_body_json):
                 else:
                     value[0]['results'][i]['open_access']['is_oa'] = 1
 
+                # 获取 2022 的引用量
+                if len(value[0]['results'][i]['counts_by_year']) == 0 or \
+                        value[0]['results'][i]['counts_by_year'][0]['year'] != 2022:
+                    value[0]['results'][i]['2022_cited_count'] = 0
+                else:
+                    value[0]['results'][i]['2022_cited_count'] = value[0]['results'][i]['counts_by_year'][0][
+                        'cited_by_count']
+
         elif request_body_json['entity_type'] == 'authors':
             value = list(open_alex.get_list_of_authors(filters=request_body_json['params'].get('filter', None),
                                                        search=request_body_json['params'].get('search', None),
@@ -317,6 +325,12 @@ def cache_get_single_by_diophila(request_body_json):
             # 如果 openAlex 信息中有原文，状态是 1
             else:
                 value['open_access']['is_oa'] = 1
+
+            # 获取 2022 的引用量
+            if len(value['counts_by_year']) == 0 or value['counts_by_year'][0]['year'] != 2022:
+                value['2022_cited_count'] = 0
+            else:
+                value['2022_cited_count'] = value['counts_by_year'][0]['cited_by_count']
 
         elif request_body_json['entity_type'] == 'authors':
             # 获取作者 ID
