@@ -5,7 +5,7 @@ from history.models import History
 from user.models import *
 from django.http import HttpResponse
 from user.tasks import *
-from utils.Redis_utils import cache_set_after_create
+from utils.Redis_utils import cache_set_after_create, get_work_abstract
 
 from utils.Sending_utils import *
 
@@ -335,6 +335,13 @@ def get_user_info(request):
         # 自己作品列表长度
         user_info_length = len(user_info[0]['results'])
         for i in range(user_info_length):
+
+            if user_info[0]['results'][i]['abstract_inverted_index'] != None:
+                user_info[0]['results'][i]['abstract'] = get_work_abstract(
+                    user_info[0]['results'][i]['abstract_inverted_index'])
+            else:
+                user_info[0]['results'][i]['abstract'] = ""
+
             # 如果 openAlex 信息中没有原文
             if not user_info[0]['results'][i]['open_access'].get('is_oa', False):
                 try:
@@ -348,6 +355,14 @@ def get_user_info(request):
             # 如果 openAlex 信息中有原文，状态是 1
             else:
                 user_info[0]['results'][i]['open_access']['is_oa'] = 1
+
+            # 获取 2022 的引用量
+            if len(user_info[0]['results'][i]['counts_by_year']) == 0 or \
+                    user_info[0]['results'][i]['counts_by_year'][0]['year'] != 2022:
+                user_info[0]['results'][i]['2022_cited_count'] = 0
+            else:
+                user_info[0]['results'][i]['2022_cited_count'] = user_info[0]['results'][i]['counts_by_year'][0][
+                    'cited_by_count']
 
         result = {'result': 1, 'message': r"获取门户信息成功！", 'user_info': user_info}
         return JsonResponse(result)
