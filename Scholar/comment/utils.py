@@ -21,7 +21,9 @@ def get_all_comments_by_comment_id(comment_id):
     #     all_comments.append(get_all_comments_by_comment_id(comment_id))
 
     for son_comment_id in comment_id_list:
-        all_comments.append(get_all_information_by_id(son_comment_id))
+        dic, flag = get_all_information_by_id(son_comment_id)
+        if not flag:
+            all_comments.append(dic)
 
     comment_dic['son_comments'] = all_comments
 
@@ -59,7 +61,7 @@ def get_all_information_by_id(comment_id):
 
     comment_dic['reply_user_information'] = reply_user_dic
 
-    return comment_dic
+    return comment_dic, comment_dic['is_deleted']
 
 
 def get_all_comments_by_work_id(work_id):
