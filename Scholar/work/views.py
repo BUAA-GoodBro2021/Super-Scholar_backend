@@ -300,7 +300,7 @@ def clear_cache_about_pdf():
         "params": {
             "filter": {
                 "from_publication_date": "2000-01-01",
-                "to_publication_date": "2022-12-30"
+                "to_publication_date": "2022-12-13"
             },
             "sort": {"cited_by_count": "desc"},
             "page": 1,
@@ -311,7 +311,7 @@ def clear_cache_about_pdf():
     recommended_work_list_by_publication_date_key = json.dumps({
         "entity_type": "works",
         "params": {
-            "filter": {"to_publication_date": "2022-12-30"},
+            "filter": {"to_publication_date": "2022-12-13"},
             "sort": {"publication_date": "desc"},
             "page": 1,
             "per_page": 25
