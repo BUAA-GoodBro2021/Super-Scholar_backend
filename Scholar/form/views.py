@@ -117,6 +117,8 @@ def manager_check_claim(request):  # 管理员查看未处理申请
         for form_id in form_handling_id_list:
             try:
                 form_key, form_dic = cache_get_by_id('form', 'form', form_id)  # 查找form
+                user_key, user_dic = cache_get_by_id('user', 'user', form_dic['user_id'])
+                form_dic['username'] = user_dic['username']
             except:
                 return JsonResponse({'result': 0, 'message': '当前表单不存在'})
             form_handling_dic_list.append(form_dic)
