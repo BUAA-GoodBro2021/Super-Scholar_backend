@@ -143,7 +143,8 @@ def reply_comment(request):
         cache.set(message_id_list_key, message_id_list_dic)
 
         # 更新被回复评论的回复评论队列
-        father_reply_comment_key, father_reply_comment_dic = cache_get_by_id('comment', 'commentofcomments', comment_id)
+        # father_reply_comment_key, father_reply_comment_dic = cache_get_by_id('comment', 'commentofcomments', comment_id)
+        father_reply_comment_key, father_reply_comment_dic = cache_get_by_id('comment', 'commentofcomments', comment.ancestor_id)
         father_reply_comment_dic['comment_id_list'].append(comment.id)
         cache.set(father_reply_comment_key, father_reply_comment_dic)
 
@@ -152,8 +153,8 @@ def reply_comment(request):
         cache_set_after_create("comment", "commentofcomments", reply_comments.id, reply_comments.to_dic())
 
         # 延迟更新数据库
-        add_comment_of_comment.delay(comment.id, comment_id)
-
+        # add_comment_of_comment.delay(comment.id, comment_id)
+        add_comment_of_comment.delay(comment.id, comment.ancestor_id)
         celery_add_user_message_id_list.delay(reply_user_id, message.id)
         celery_add_unread_message_count(reply_user_id)
 
