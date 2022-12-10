@@ -299,7 +299,7 @@ def clear_cache_about_pdf():
         "entity_type": "works",
         "params": {
             "filter": {
-                "from_publication_date": "2000-01-01",
+                "from_publication_date": "2002-01-01",
                 "to_publication_date": "2022-12-13"
             },
             "sort": {"cited_by_count": "desc"},

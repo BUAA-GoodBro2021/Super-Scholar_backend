@@ -36,7 +36,7 @@ def get_index_data_view(request):
             "entity_type": "works",
             "params": {
                 "filter": {
-                    "from_publication_date": "2000-01-01",
+                    "from_publication_date": "2002-01-01",
                     "to_publication_date": "2022-12-13"
                 },
                 "sort": {"cited_by_count": "desc"},
@@ -169,7 +169,7 @@ def get_groups_of_data_view(request):
         elif request_body_json['entity_type'] == 'authors':
             # 分组实体
             groups_of_data = cache_get_groups_by_diophila(request_body_json)
-            result = {'result': 1, 'message': r"作者分组成功！",  "groups_of_data": groups_of_data}
+            result = {'result': 1, 'message': r"作者分组成功！", "groups_of_data": groups_of_data}
         elif request_body_json['entity_type'] == 'venues':
             # 分组实体
             groups_of_data = cache_get_groups_by_diophila(request_body_json)
