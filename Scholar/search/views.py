@@ -128,7 +128,6 @@ def get_list_of_data_view(request):
     if request.method == 'POST':
         # 获取请求体
         request_body_json = json.loads(request.body.decode())
-
         if request_body_json['entity_type'] == 'works':
             # 筛选实体
             list_of_data = cache_get_list_by_diophila(request_body_json)
@@ -184,6 +183,215 @@ def get_groups_of_data_view(request):
             result = {'result': 1, 'message': r"概念领域分组成功！", "groups_of_data": groups_of_data}
         else:
             result = {'result': 0, 'message': r"请求实体类型错误，该实体类型不属于网站所包含的实体！"}
+        return JsonResponse(result)
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+
+
+# 高级检索
+def advanced_search_view(request):
+    if request.method == 'POST':
+        # 获取请求体
+        request_body_json = json.loads(request.body.decode())
+        url = "https://api.openalex.org/" + "works"
+        filter_dict = request_body_json['params'].get('filter', None)
+        search_string = request_body_json['params'].get('search', None)
+        page = str(request_body_json['params'].get('page', 1))
+        per_page = str(request_body_json['params'].get('per_page', 25))
+
+        # 如果需要查询某个作者
+        if filter_dict.get("authorships.author.display_name", None) is not None:
+            author_list = []
+            display_name_string = filter_dict['authorships.author.display_name']
+            display_name_string = display_name_string.replace("|", "&")
+            display_name_list = display_name_string.split("&")
+            for every_display_name in display_name_list:
+                if every_display_name[0] != "!":
+                    value = cache_get_list_by_diophila(
+                        {
+                            "entity_type": "authors",
+                            "params": {
+                                "search": every_display_name,
+                                "page": 1,
+                                "per_page": 5
+                            }
+                        }
+                    )
+                    for every_author in value[0]['results']:
+                        author_list.append(every_author['id'].split('/')[-1])
+            filter_dict['authorships.author.id'] = '|'.join(author_list)
+            filter_dict.pop("authorships.author.display_name")
+
+        # 如果需要查询某个机构
+        if filter_dict.get("authorships.institutions.display_name", None) is not None:
+            institution_list = []
+            display_name_string = filter_dict['authorships.institutions.display_name']
+            display_name_string = display_name_string.replace("|", "&")
+            display_name_list = display_name_string.split("&")
+            for every_display_name in display_name_list:
+                if every_display_name[0] != "!":
+                    value = cache_get_list_by_diophila(
+                        {
+                            "entity_type": "institutions",
+                            "params": {
+                                "search": every_display_name,
+                                "page": 1,
+                                "per_page": 5
+                            }
+                        }
+                    )
+                    for every_institution in value[0]['results']:
+                        institution_list.append(every_institution['id'].split('/')[-1])
+            filter_dict['authorships.institutions.id'] = '|'.join(institution_list)
+            filter_dict.pop("authorships.institutions.display_name")
+
+        # 如果需要查询某个期刊会议
+        if filter_dict.get("host_venue.display_name", None) is not None:
+            venue_list = []
+            display_name_string = filter_dict['host_venue.display_name']
+            display_name_string = display_name_string.replace("|", "&")
+            display_name_list = display_name_string.split("&")
+            for every_display_name in display_name_list:
+                if every_display_name[0] != "!":
+                    value = cache_get_list_by_diophila(
+                        {
+                            "entity_type": "venues",
+                            "params": {
+                                "search": every_display_name,
+                                "page": 1,
+                                "per_page": 5
+                            }
+                        }
+                    )
+                    for every_venue in value[0]['results']:
+                        venue_list.append(every_venue['id'].split('/')[-1])
+            filter_dict['host_venue.id'] = '|'.join(venue_list)
+            filter_dict.pop("host_venue.display_name")
+
+        # 如果需要查询某个期刊会议
+        if filter_dict.get("concepts.display_name", None) is not None:
+            concept_list = []
+            display_name_string = filter_dict['concepts.display_name']
+            display_name_string = display_name_string.replace("|", "&")
+            display_name_list = display_name_string.split("&")
+            for every_display_name in display_name_list:
+                if every_display_name[0] != "!":
+                    value = cache_get_list_by_diophila(
+                        {
+                            "entity_type": "concepts",
+                            "params": {
+                                "search": every_display_name,
+                                "page": 1,
+                                "per_page": 5
+                            }
+                        }
+                    )
+                    for every_concept in value[0]['results']:
+                        concept_list.append(every_concept['id'].split('/')[-1])
+            filter_dict['concepts.id'] = '|'.join(concept_list)
+            filter_dict.pop("concepts.display_name")
+
+        # 有过滤器
+        filter_string_list = []
+        if filter_dict is not None:
+            url += "?filter="
+            for key, value in filter_dict.items():
+                # 说明没有 和&
+                if value.find('&') == -1:
+                    # 说明没有 或| 此时可以直接拼接
+                    if value.find('|') == -1:
+                        filter_string_list.append(key + ":" + value)
+                    # 如果有或
+                    else:
+                        # 此时要筛选出带有 !非的 单独
+                        or_not_list = value.split('|')
+                        not_count = value.count('!')
+                        # 非的个数为1才有效
+                        if not_count == 0:
+                            filter_string_list.append(key + ":" + value)
+                        elif not_count == 1:
+                            or_string_list = []
+                            not_string = ""
+                            for item in or_not_list:
+                                if item[0] != '!':
+                                    or_string_list.append(item)
+                                else:
+                                    not_string = item
+                            filter_string_list.append(key + ":" + not_string + "|" + "|".join(or_string_list))
+                        else:
+                            pass
+                else:
+                    and_list = value.split('&')
+                    url_and_string = []
+                    for every_and_list in and_list:
+                        # 说明没有 或| 此时可以直接拼接
+                        if every_and_list.find('|') == -1:
+                            url_and_string.append(key + ":" + every_and_list)
+                        # 如果有或
+                        else:
+                            # 此时要筛选出带有 !非的 单独
+                            or_not_list = every_and_list.split('|')
+                            not_count = every_and_list.count('!')
+                            # 非的个数为1才有效
+                            if not_count == 0:
+                                url_and_string.append(key + ":" + every_and_list)
+                            elif not_count == 1:
+                                or_string_list = []
+                                not_string = ""
+                                for item in or_not_list:
+                                    if item[0] != '!':
+                                        or_string_list.append(item)
+                                    else:
+                                        not_string = item
+                                url_and_string.append(key + ":" + not_string + "|" + "|".join(or_string_list))
+                            else:
+                                pass
+                    filter_string_list.append(",".join(url_and_string))
+
+        url += ",".join(filter_string_list)
+        if url[-1] == '=':
+            url = url.replace("?filter=", "")
+
+        if search_string is not None:
+            url += "&search=" + search_string
+        url += "&page=" + page + "&per-page=" + per_page + "&mailto=" + open_alex_mailto_email
+
+        value = []
+        data = requests.get(url).json()
+        value.append(data)
+        # 自己作品列表长度
+        value_length = len(value[0]['results'])
+        for i in range(value_length):
+            if value[0]['results'][i]['abstract_inverted_index'] != None:
+                value[0]['results'][i]['abstract'] = get_work_abstract(
+                    value[0]['results'][i]['abstract_inverted_index'])
+            else:
+                value[0]['results'][i]['abstract'] = ""
+
+            # 如果 openAlex 信息中没有原文
+            if not value[0]['results'][i]['open_access'].get('is_oa', False):
+                try:
+                    # 是否上传 PDF, 如果上传并审核成功是 1, 上传正在审核是 0, 如果没有上传是 -1
+                    work_key, work_dic = cache_get_by_id('work', 'work',
+                                                         value[0]['results'][i]['id'].split('/')[-1])
+                    value[0]['results'][i]['open_access']['is_oa'] = work_dic['has_pdf']
+                    value[0]['results'][i]['open_access']['oa_url'] = work_dic['url']
+                except:
+                    value[0]['results'][i]['open_access']['is_oa'] = -1
+            # 如果 openAlex 信息中有原文，状态是 1
+            else:
+                value[0]['results'][i]['open_access']['is_oa'] = 1
+
+            # 获取 2022 的引用量
+            if len(value[0]['results'][i]['counts_by_year']) == 0 or \
+                    value[0]['results'][i]['counts_by_year'][0]['year'] != 2022:
+                value[0]['results'][i]['2022_cited_count'] = 0
+            else:
+                value[0]['results'][i]['2022_cited_count'] = value[0]['results'][i]['counts_by_year'][0][
+                    'cited_by_count']
+
+        result = {'result': 1, 'message': r"概念领域分组成功！", "advanced_search_data": value}
         return JsonResponse(result)
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}

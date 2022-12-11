@@ -16,4 +16,7 @@ urlpatterns = [
     # 分组实体
     path("get_groups_of_data_view", views.get_groups_of_data_view),
 
+    # 高级检索
+    path("advanced_search_view", views.advanced_search_view),
+
 ]
