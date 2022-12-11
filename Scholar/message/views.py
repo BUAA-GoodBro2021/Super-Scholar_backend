@@ -45,16 +45,17 @@ def delete_message(request):
     data_json = json.loads(request.body.decode())
     print(data_json)
     user_id = request.user_id
-    message_id = data_json.get('message_id')
+    message_id_list = data_json.get('message_id_list')
     try:
         message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
     except:
         return JsonResponse({'result': 0, 'message': '此用户无消息列表'})
-    message_id_list_dic['message_id_list'].remove(message_id)
+    for message_id in message_id_list:
+        message_id_list_dic['message_id_list'].remove(message_id)
+        cache.delete('message:' + 'message:' + str(message_id))
+        celery_delete_message.delay(message_id)
+    celery_remove_message_id.delay(user_id, message_id_list)
     cache.set(message_id_list_key, message_id_list_dic)
-    celery_remove_message_id.delay(user_id, message_id)
-    cache.delete('message:' + 'message:' + str(message_id))
-    celery_delete_message.delay(message_id)
     return JsonResponse({'result': 1, 'message': '删除消息成功'})
 
 
