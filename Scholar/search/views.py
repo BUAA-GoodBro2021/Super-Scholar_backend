@@ -277,7 +277,7 @@ def advanced_search_view(request):
 
         if request_body_json['entity_type'] == 'works':
             # 如果需要查询某个作者
-            if filter_dict.get("authorships.author.display_name", None) is not None:
+            if filter_dict is not None and filter_dict.get("authorships.author.display_name", None) is not None:
                 author_list = []
                 display_name_string = filter_dict['authorships.author.display_name']
                 display_name_string = display_name_string.replace("|", "&")
@@ -300,7 +300,7 @@ def advanced_search_view(request):
                 filter_dict.pop("authorships.author.display_name")
 
             # 如果需要查询某个机构
-            if filter_dict.get("authorships.institutions.display_name", None) is not None:
+            if filter_dict is not None and filter_dict.get("authorships.institutions.display_name", None) is not None:
                 institution_list = []
                 display_name_string = filter_dict['authorships.institutions.display_name']
                 display_name_string = display_name_string.replace("|", "&")
@@ -323,7 +323,7 @@ def advanced_search_view(request):
                 filter_dict.pop("authorships.institutions.display_name")
 
             # 如果需要查询某个期刊会议
-            if filter_dict.get("host_venue.display_name", None) is not None:
+            if filter_dict is not None and filter_dict.get("host_venue.display_name", None) is not None:
                 venue_list = []
                 display_name_string = filter_dict['host_venue.display_name']
                 display_name_string = display_name_string.replace("|", "&")
@@ -346,7 +346,7 @@ def advanced_search_view(request):
                 filter_dict.pop("host_venue.display_name")
 
             # 如果需要查询某个期刊会议
-            if filter_dict.get("concepts.display_name", None) is not None:
+            if filter_dict is not None and filter_dict.get("concepts.display_name", None) is not None:
                 concept_list = []
                 display_name_string = filter_dict['concepts.display_name']
                 display_name_string = display_name_string.replace("|", "&")
@@ -370,7 +370,7 @@ def advanced_search_view(request):
 
         if request_body_json['entity_type'] == 'authors':
             # 如果需要查询某个机构
-            if filter_dict.get("last_known_institution.display_name", None) is not None:
+            if filter_dict is not None and filter_dict.get("last_known_institution.display_name", None) is not None:
                 institution_list = []
                 display_name_string = filter_dict['last_known_institution.display_name']
                 display_name_string = display_name_string.replace("|", "&")
@@ -395,7 +395,7 @@ def advanced_search_view(request):
         if request_body_json['entity_type'] == 'authors' or request_body_json['entity_type'] == 'venues' or \
                 request_body_json['entity_type'] == 'institutions':
             # 如果需要查询某个期刊会议
-            if filter_dict.get("x_concepts.display_name", None) is not None:
+            if filter_dict is not None and filter_dict.get("x_concepts.display_name", None) is not None:
                 concept_list = []
                 display_name_string = filter_dict['x_concepts.display_name']
                 display_name_string = display_name_string.replace("|", "&")
@@ -419,7 +419,7 @@ def advanced_search_view(request):
 
         if request_body_json['entity_type'] == 'concepts':
             # 如果需要查询某个期刊会议
-            if filter_dict.get("ancestors.display_name", None) is not None:
+            if filter_dict is not None and filter_dict.get("ancestors.display_name", None) is not None:
                 concept_list = []
                 display_name_string = filter_dict['ancestors.display_name']
                 display_name_string = display_name_string.replace("|", "&")
@@ -503,20 +503,38 @@ def advanced_search_view(request):
                 url = url.replace("?filter=", "")
 
         if search_string is not None:
-            url += "&search=" + search_string
-            if url[-1] == '=':
-                url = url.replace("&search=", "")
+            if filter_dict is None:
+                url += "?search=" + search_string
+                if url[-1] == '=':
+                    url = url.replace("?search=", "")
+            else:
+                url += "&search=" + search_string
+                if url[-1] == '=':
+                    url = url.replace("&search=", "")
 
         if sort_dict is not None:
-            url += "&sort="
-            sort_string_list = []
-            for key, value in sort_dict.items():
-                sort_string_list.append(key + ":" + value)
-            url += ",".join(sort_string_list)
-            if url[-1] == '=':
-                url = url.replace("&sort=", "")
+            if filter_dict is None and search_string is None:
+                url += "?sort="
+                sort_string_list = []
+                for key, value in sort_dict.items():
+                    sort_string_list.append(key + ":" + value)
+                url += ",".join(sort_string_list)
+                if url[-1] == '=':
+                    url = url.replace("?sort=", "")
+            else:
+                url += "&sort="
+                sort_string_list = []
+                for key, value in sort_dict.items():
+                    sort_string_list.append(key + ":" + value)
+                url += ",".join(sort_string_list)
+                if url[-1] == '=':
+                    url = url.replace("&sort=", "")
 
-        url += "&page=" + page + "&per-page=" + per_page + "&mailto=" + open_alex_mailto_email
+        if filter_dict is None and search_string is None and sort_dict is not None:
+            url += "&page=" + page + "&per-page=" + per_page + "&mailto=" + open_alex_mailto_email
+        else:
+            url += "?page=" + page + "&per-page=" + per_page + "&mailto=" + open_alex_mailto_email
+
 
         value = []
         data = requests.get(url).json()
