@@ -5,6 +5,8 @@ from search import views
 urlpatterns = [
     # 主页部分
     path("get_index_data_view", views.get_index_data_view),
+    path("get_open_alex_data_num_view", views.get_open_alex_data_num_view),
+    path("get_recommended_data_view", views.get_recommended_data_view),
     path("associate_content_view", views.associate_content_view),
 
     # 实体详情

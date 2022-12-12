@@ -71,6 +71,53 @@ def get_index_data_view(request):
         return JsonResponse(result)
 
 
+def get_open_alex_data_num_view(request):
+    # 获取主页五大实体的数据
+    work_count, author_count, venues_count, institutions_count, concepts_count = get_open_alex_data_num()
+    result = {'result': 1, 'message': r"获取数据量成功！",
+              "work_count": work_count, "author_count": author_count, "venues_count": venues_count,
+              "institutions_count": institutions_count, "concepts_count": concepts_count}
+    return JsonResponse(result)
+
+
+def get_recommended_data_view(request):
+    if request.method == 'POST':
+        # 获取引用量前25的论文
+        request_body_json = {
+            "entity_type": "works",
+            "params": {
+                "filter": {
+                    "from_publication_date": "2002-01-01",
+                    "to_publication_date": "2022-12-13"
+                },
+                "sort": {"cited_by_count": "desc"},
+                "page": 1,
+                "per_page": 25
+            }
+        }
+        recommended_work_list_by_cited_count = cache_get_list_by_diophila(request_body_json)
+
+        # 获取发布时间前25的论文
+        request_body_json = {
+            "entity_type": "works",
+            "params": {
+                "filter": {"to_publication_date": "2022-12-13"},
+                "sort": {"publication_date": "desc"},
+                "page": 1,
+                "per_page": 25
+            }
+        }
+        recommended_work_list_by_publication_date = cache_get_list_by_diophila(request_body_json)
+
+        result = {'result': 1, 'message': r"获取推荐信息成功！",
+                  "recommended_work_list_by_cited_count": recommended_work_list_by_cited_count,
+                  "recommended_work_list_by_publication_date": recommended_work_list_by_publication_date}
+        return JsonResponse(result)
+    else:
+        result = {'result': 0, 'message': r"请求方式错误！"}
+        return JsonResponse(result)
+
+
 # 联想用户搜索的内容
 def associate_content_view(request):
     if request.method == 'POST':
