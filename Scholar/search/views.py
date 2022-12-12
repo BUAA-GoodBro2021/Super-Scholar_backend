@@ -241,103 +241,205 @@ def advanced_search_view(request):
     if request.method == 'POST':
         # 获取请求体
         request_body_json = json.loads(request.body.decode())
-        url = "https://api.openalex.org/" + "works"
+        url = "https://api.openalex.org/" + request_body_json['entity_type']
+
+        # 处理筛选器字段，使其符合 openAlex 的筛选要求
+        if request_body_json['params'].get('filter', None) is not None:
+            filter_param = request_body_json['params'].get('filter', None).copy()
+            # 如果筛选器字段中存在值为空字符串的键值对
+            for key, value in filter_param.items():
+                if value == '':
+                    request_body_json['params']['filter'].pop(key)
+            if len(request_body_json['params']['filter']) == 0:
+                request_body_json['params'].pop('filter')
+
+        # 处理排序字段，使其符合 openAlex 的排序要求
+        if request_body_json['params'].get('sort', None) is not None:
+            sort_param = request_body_json['params'].get('sort', None).copy()
+            # 如果排序器字段中存在值为空字符串的键值对
+            for key, value in sort_param.items():
+                if value == '':
+                    request_body_json['params']['sort'].pop(key)
+            # 如果多级排序中既有升序也有降序
+            if 'asc' in sort_param.values() and 'desc' in sort_param.values():
+                for key, value in sort_param.items():
+                    if value != 'desc':
+                        request_body_json['params']['sort'].pop(key)
+            if len(request_body_json['params']['sort']) == 0:
+                request_body_json['params'].pop('sort')
+
         filter_dict = request_body_json['params'].get('filter', None)
         search_string = request_body_json['params'].get('search', None)
+        sort_dict = request_body_json['params'].get('sort', None)
+
         page = str(request_body_json['params'].get('page', 1))
         per_page = str(request_body_json['params'].get('per_page', 25))
 
-        # 如果需要查询某个作者
-        if filter_dict.get("authorships.author.display_name", None) is not None:
-            author_list = []
-            display_name_string = filter_dict['authorships.author.display_name']
-            display_name_string = display_name_string.replace("|", "&")
-            display_name_list = display_name_string.split("&")
-            for every_display_name in display_name_list:
-                if every_display_name[0] != "!":
-                    value = cache_get_list_by_diophila(
-                        {
-                            "entity_type": "authors",
-                            "params": {
-                                "search": every_display_name,
-                                "page": 1,
-                                "per_page": 5
+        if request_body_json['entity_type'] == 'works':
+            # 如果需要查询某个作者
+            if filter_dict.get("authorships.author.display_name", None) is not None:
+                author_list = []
+                display_name_string = filter_dict['authorships.author.display_name']
+                display_name_string = display_name_string.replace("|", "&")
+                display_name_list = display_name_string.split("&")
+                for every_display_name in display_name_list:
+                    if every_display_name[0] != "!":
+                        value = cache_get_list_by_diophila(
+                            {
+                                "entity_type": "authors",
+                                "params": {
+                                    "search": every_display_name,
+                                    "page": 1,
+                                    "per_page": 5
+                                }
                             }
-                        }
-                    )
-                    for every_author in value[0]['results']:
-                        author_list.append(every_author['id'].split('/')[-1])
-            filter_dict['authorships.author.id'] = '|'.join(author_list)
-            filter_dict.pop("authorships.author.display_name")
+                        )
+                        for every_author in value[0]['results']:
+                            author_list.append(every_author['id'].split('/')[-1])
+                filter_dict['authorships.author.id'] = '|'.join(author_list)
+                filter_dict.pop("authorships.author.display_name")
 
-        # 如果需要查询某个机构
-        if filter_dict.get("authorships.institutions.display_name", None) is not None:
-            institution_list = []
-            display_name_string = filter_dict['authorships.institutions.display_name']
-            display_name_string = display_name_string.replace("|", "&")
-            display_name_list = display_name_string.split("&")
-            for every_display_name in display_name_list:
-                if every_display_name[0] != "!":
-                    value = cache_get_list_by_diophila(
-                        {
-                            "entity_type": "institutions",
-                            "params": {
-                                "search": every_display_name,
-                                "page": 1,
-                                "per_page": 5
+            # 如果需要查询某个机构
+            if filter_dict.get("authorships.institutions.display_name", None) is not None:
+                institution_list = []
+                display_name_string = filter_dict['authorships.institutions.display_name']
+                display_name_string = display_name_string.replace("|", "&")
+                display_name_list = display_name_string.split("&")
+                for every_display_name in display_name_list:
+                    if every_display_name[0] != "!":
+                        value = cache_get_list_by_diophila(
+                            {
+                                "entity_type": "institutions",
+                                "params": {
+                                    "search": every_display_name,
+                                    "page": 1,
+                                    "per_page": 5
+                                }
                             }
-                        }
-                    )
-                    for every_institution in value[0]['results']:
-                        institution_list.append(every_institution['id'].split('/')[-1])
-            filter_dict['authorships.institutions.id'] = '|'.join(institution_list)
-            filter_dict.pop("authorships.institutions.display_name")
+                        )
+                        for every_institution in value[0]['results']:
+                            institution_list.append(every_institution['id'].split('/')[-1])
+                filter_dict['authorships.institutions.id'] = '|'.join(institution_list)
+                filter_dict.pop("authorships.institutions.display_name")
 
-        # 如果需要查询某个期刊会议
-        if filter_dict.get("host_venue.display_name", None) is not None:
-            venue_list = []
-            display_name_string = filter_dict['host_venue.display_name']
-            display_name_string = display_name_string.replace("|", "&")
-            display_name_list = display_name_string.split("&")
-            for every_display_name in display_name_list:
-                if every_display_name[0] != "!":
-                    value = cache_get_list_by_diophila(
-                        {
-                            "entity_type": "venues",
-                            "params": {
-                                "search": every_display_name,
-                                "page": 1,
-                                "per_page": 5
+            # 如果需要查询某个期刊会议
+            if filter_dict.get("host_venue.display_name", None) is not None:
+                venue_list = []
+                display_name_string = filter_dict['host_venue.display_name']
+                display_name_string = display_name_string.replace("|", "&")
+                display_name_list = display_name_string.split("&")
+                for every_display_name in display_name_list:
+                    if every_display_name[0] != "!":
+                        value = cache_get_list_by_diophila(
+                            {
+                                "entity_type": "venues",
+                                "params": {
+                                    "search": every_display_name,
+                                    "page": 1,
+                                    "per_page": 5
+                                }
                             }
-                        }
-                    )
-                    for every_venue in value[0]['results']:
-                        venue_list.append(every_venue['id'].split('/')[-1])
-            filter_dict['host_venue.id'] = '|'.join(venue_list)
-            filter_dict.pop("host_venue.display_name")
+                        )
+                        for every_venue in value[0]['results']:
+                            venue_list.append(every_venue['id'].split('/')[-1])
+                filter_dict['host_venue.id'] = '|'.join(venue_list)
+                filter_dict.pop("host_venue.display_name")
 
-        # 如果需要查询某个期刊会议
-        if filter_dict.get("concepts.display_name", None) is not None:
-            concept_list = []
-            display_name_string = filter_dict['concepts.display_name']
-            display_name_string = display_name_string.replace("|", "&")
-            display_name_list = display_name_string.split("&")
-            for every_display_name in display_name_list:
-                if every_display_name[0] != "!":
-                    value = cache_get_list_by_diophila(
-                        {
-                            "entity_type": "concepts",
-                            "params": {
-                                "search": every_display_name,
-                                "page": 1,
-                                "per_page": 5
+            # 如果需要查询某个期刊会议
+            if filter_dict.get("concepts.display_name", None) is not None:
+                concept_list = []
+                display_name_string = filter_dict['concepts.display_name']
+                display_name_string = display_name_string.replace("|", "&")
+                display_name_list = display_name_string.split("&")
+                for every_display_name in display_name_list:
+                    if every_display_name[0] != "!":
+                        value = cache_get_list_by_diophila(
+                            {
+                                "entity_type": "concepts",
+                                "params": {
+                                    "search": every_display_name,
+                                    "page": 1,
+                                    "per_page": 5
+                                }
                             }
-                        }
-                    )
-                    for every_concept in value[0]['results']:
-                        concept_list.append(every_concept['id'].split('/')[-1])
-            filter_dict['concepts.id'] = '|'.join(concept_list)
-            filter_dict.pop("concepts.display_name")
+                        )
+                        for every_concept in value[0]['results']:
+                            concept_list.append(every_concept['id'].split('/')[-1])
+                filter_dict['concepts.id'] = '|'.join(concept_list)
+                filter_dict.pop("concepts.display_name")
+
+        if request_body_json['entity_type'] == 'authors':
+            # 如果需要查询某个机构
+            if filter_dict.get("last_known_institution.display_name", None) is not None:
+                institution_list = []
+                display_name_string = filter_dict['last_known_institution.display_name']
+                display_name_string = display_name_string.replace("|", "&")
+                display_name_list = display_name_string.split("&")
+                for every_display_name in display_name_list:
+                    if every_display_name[0] != "!":
+                        value = cache_get_list_by_diophila(
+                            {
+                                "entity_type": "institutions",
+                                "params": {
+                                    "search": every_display_name,
+                                    "page": 1,
+                                    "per_page": 5
+                                }
+                            }
+                        )
+                        for every_institution in value[0]['results']:
+                            institution_list.append(every_institution['id'].split('/')[-1])
+                filter_dict['last_known_institution.id'] = '|'.join(institution_list)
+                filter_dict.pop("last_known_institution.display_name")
+
+        if request_body_json['entity_type'] == 'authors' or request_body_json['entity_type'] == 'venues' or \
+                request_body_json['entity_type'] == 'institutions':
+            # 如果需要查询某个期刊会议
+            if filter_dict.get("x_concepts.display_name", None) is not None:
+                concept_list = []
+                display_name_string = filter_dict['x_concepts.display_name']
+                display_name_string = display_name_string.replace("|", "&")
+                display_name_list = display_name_string.split("&")
+                for every_display_name in display_name_list:
+                    if every_display_name[0] != "!":
+                        value = cache_get_list_by_diophila(
+                            {
+                                "entity_type": "concepts",
+                                "params": {
+                                    "search": every_display_name,
+                                    "page": 1,
+                                    "per_page": 5
+                                }
+                            }
+                        )
+                        for every_concept in value[0]['results']:
+                            concept_list.append(every_concept['id'].split('/')[-1])
+                filter_dict['x_concepts.id'] = '|'.join(concept_list)
+                filter_dict.pop("x_concepts.display_name")
+
+        if request_body_json['entity_type'] == 'concepts':
+            # 如果需要查询某个期刊会议
+            if filter_dict.get("ancestors.display_name", None) is not None:
+                concept_list = []
+                display_name_string = filter_dict['ancestors.display_name']
+                display_name_string = display_name_string.replace("|", "&")
+                display_name_list = display_name_string.split("&")
+                for every_display_name in display_name_list:
+                    if every_display_name[0] != "!":
+                        value = cache_get_list_by_diophila(
+                            {
+                                "entity_type": "concepts",
+                                "params": {
+                                    "search": every_display_name,
+                                    "page": 1,
+                                    "per_page": 5
+                                }
+                            }
+                        )
+                        for every_concept in value[0]['results']:
+                            concept_list.append(every_concept['id'].split('/')[-1])
+                filter_dict['ancestors.id'] = '|'.join(concept_list)
+                filter_dict.pop("ancestors.display_name")
 
         # 有过滤器
         filter_string_list = []
@@ -396,49 +498,64 @@ def advanced_search_view(request):
                                 pass
                     filter_string_list.append(",".join(url_and_string))
 
-        url += ",".join(filter_string_list)
-        if url[-1] == '=':
-            url = url.replace("?filter=", "")
+            url += ",".join(filter_string_list)
+            if url[-1] == '=':
+                url = url.replace("?filter=", "")
 
         if search_string is not None:
             url += "&search=" + search_string
+            if url[-1] == '=':
+                url = url.replace("&search=", "")
+
+        if sort_dict is not None:
+            url += "&sort="
+            sort_string_list = []
+            for key, value in sort_dict.items():
+                sort_string_list.append(key + ":" + value)
+            url += ",".join(sort_string_list)
+            if url[-1] == '=':
+                url = url.replace("&sort=", "")
+
         url += "&page=" + page + "&per-page=" + per_page + "&mailto=" + open_alex_mailto_email
 
         value = []
         data = requests.get(url).json()
         value.append(data)
-        # 自己作品列表长度
-        value_length = len(value[0]['results'])
-        for i in range(value_length):
-            if value[0]['results'][i]['abstract_inverted_index'] != None:
-                value[0]['results'][i]['abstract'] = get_work_abstract(
-                    value[0]['results'][i]['abstract_inverted_index'])
-            else:
-                value[0]['results'][i]['abstract'] = ""
 
-            # 如果 openAlex 信息中没有原文
-            if not value[0]['results'][i]['open_access'].get('is_oa', False):
-                try:
-                    # 是否上传 PDF, 如果上传并审核成功是 1, 上传正在审核是 0, 如果没有上传是 -1
-                    work_key, work_dic = cache_get_by_id('work', 'work',
-                                                         value[0]['results'][i]['id'].split('/')[-1])
-                    value[0]['results'][i]['open_access']['is_oa'] = work_dic['has_pdf']
-                    value[0]['results'][i]['open_access']['oa_url'] = work_dic['url']
-                except:
-                    value[0]['results'][i]['open_access']['is_oa'] = -1
-            # 如果 openAlex 信息中有原文，状态是 1
-            else:
-                value[0]['results'][i]['open_access']['is_oa'] = 1
+        if request_body_json['entity_type'] == 'works':
+            # 自己作品列表长度
+            value_length = len(value[0]['results'])
+            for i in range(value_length):
+                if value[0]['results'][i]['abstract_inverted_index'] != None:
+                    value[0]['results'][i]['abstract'] = get_work_abstract(
+                        value[0]['results'][i]['abstract_inverted_index'])
+                else:
+                    value[0]['results'][i]['abstract'] = ""
 
-            # 获取 2022 的引用量
-            if len(value[0]['results'][i]['counts_by_year']) == 0 or \
-                    value[0]['results'][i]['counts_by_year'][0]['year'] != 2022:
-                value[0]['results'][i]['2022_cited_count'] = 0
-            else:
-                value[0]['results'][i]['2022_cited_count'] = value[0]['results'][i]['counts_by_year'][0][
-                    'cited_by_count']
+                # 如果 openAlex 信息中没有原文
+                if not value[0]['results'][i]['open_access'].get('is_oa', False):
+                    try:
+                        # 是否上传 PDF, 如果上传并审核成功是 1, 上传正在审核是 0, 如果没有上传是 -1
+                        work_key, work_dic = cache_get_by_id('work', 'work',
+                                                             value[0]['results'][i]['id'].split('/')[-1])
+                        value[0]['results'][i]['open_access']['is_oa'] = work_dic['has_pdf']
+                        value[0]['results'][i]['open_access']['oa_url'] = work_dic['url']
+                    except:
+                        value[0]['results'][i]['open_access']['is_oa'] = -1
+                # 如果 openAlex 信息中有原文，状态是 1
+                else:
+                    value[0]['results'][i]['open_access']['is_oa'] = 1
 
-        result = {'result': 1, 'message': r"概念领域分组成功！", "advanced_search_data": value}
+                # 获取 2022 的引用量
+                if len(value[0]['results'][i]['counts_by_year']) == 0 or \
+                        value[0]['results'][i]['counts_by_year'][0]['year'] != 2022:
+                    value[0]['results'][i]['2022_cited_count'] = 0
+                else:
+                    value[0]['results'][i]['2022_cited_count'] = value[0]['results'][i]['counts_by_year'][0][
+                        'cited_by_count']
+
+        value[0]['meta']['url'] = url
+        result = {'result': 1, 'message': r"高级检索成功！", "advanced_search_data": value}
         return JsonResponse(result)
     else:
         result = {'result': 0, 'message': r"请求方式错误！"}
