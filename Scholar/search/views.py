@@ -530,10 +530,10 @@ def advanced_search_view(request):
                 if url[-1] == '=':
                     url = url.replace("&sort=", "")
 
-        if filter_dict is None and search_string is None and sort_dict is not None:
-            url += "&page=" + page + "&per-page=" + per_page + "&mailto=" + open_alex_mailto_email
-        else:
+        if filter_dict is None and search_string is None and sort_dict is None:
             url += "?page=" + page + "&per-page=" + per_page + "&mailto=" + open_alex_mailto_email
+        else:
+            url += "&page=" + page + "&per-page=" + per_page + "&mailto=" + open_alex_mailto_email
 
 
         value = []
