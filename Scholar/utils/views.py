@@ -52,10 +52,10 @@ def active(request, token):
     if 'email' in payload.keys():
         email = payload.get('email')
 
-        if User.objects.filter(is_active=True).exists():
-            content["title"] = "激活失败"
-            content["message"] = "该用户名已经被激活过了，换一个用户名叭！"
-            return render(request, 'EmailContent-check.html', content)
+        # if User.objects.filter(username=,is_active=True).exists():
+        #     content["title"] = "激活失败"
+        #     content["message"] = "该用户名已经被激活过了，换一个用户名叭！"
+        #     return render(request, 'EmailContent-check.html', content)
 
         # 激活用户 验证邮箱
         user_dict['is_active'] = True
