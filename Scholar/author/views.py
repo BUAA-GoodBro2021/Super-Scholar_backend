@@ -97,7 +97,7 @@ def get_relate_net(request):
                         print(author)
                         continue
 
-        cooperation_author_list.sort(key=lambda s: s['cooperation_author_count'])
+        cooperation_author_list.sort(key=lambda s: s['cooperation_author_count'], reverse=True)
 
         return JsonResponse(
             {'result': 1, 'message': '获取成功', 'cooperation_author_count': cooperation_author_count,
