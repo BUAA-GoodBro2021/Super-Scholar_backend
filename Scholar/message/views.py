@@ -13,9 +13,9 @@ from message.models import *
 @login_checker
 def look_message_list(request):
     data_json = json.loads(request.body.decode())
-    # print(data_json)
+    print(data_json)
     user_id = request.user_id
-    # print(user_id)
+    print(user_id)
     message_id_list_key, message_id_list_dic = cache_get_by_id('message', 'usermessageidlist', user_id)
     user_key, user_dic = cache_get_by_id('user', 'user', user_id)
     user_dic['unread_message_count'] = 0
@@ -43,7 +43,7 @@ def look_message_list(request):
 @login_checker
 def delete_message(request):
     data_json = json.loads(request.body.decode())
-    # print(data_json)
+    print(data_json)
     user_id = request.user_id
     message_id_list = data_json.get('message_id_list')
     try:
@@ -62,7 +62,7 @@ def delete_message(request):
 @login_checker
 def look_unread_message_count(request):
     data_json = json.loads(request.body.decode())
-    # print(data_json)
+    print(data_json)
     user_id = request.user_id
     user_key, user_dic = cache_get_by_id('user', 'user', user_id)
     return JsonResponse(

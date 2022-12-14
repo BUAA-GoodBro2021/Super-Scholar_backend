@@ -64,7 +64,7 @@ def register(request):
         result = {'result': 0, 'message': r"正在内测中, 暂时不对外开放注册！"}
 
         data_json = json.loads(request.body.decode())
-        # print(data_json)
+        print(data_json)
 
         username = data_json.get('username', '')
         password1 = data_json.get('password1', '')
@@ -120,7 +120,7 @@ def login(request):
 
         # 获取表单信息
         data_json = json.loads(request.body.decode())
-        # print(data_json)
+        print(data_json)
         username = data_json.get('username', '')
         password = data_json.get('password', '')
 
@@ -176,7 +176,7 @@ def find_password(request):
 
         # 获取表单信息
         data_json = json.loads(request.body.decode())
-        # print(data_json)
+        print(data_json)
         email = data_json.get('email', '')
         username = data_json.get('username', '')
         password1 = data_json.get('password1', '')

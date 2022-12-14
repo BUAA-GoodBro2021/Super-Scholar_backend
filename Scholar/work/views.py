@@ -53,7 +53,7 @@ def user_upload_pdf(request):  # 用户上传pdf
     if upload_result == -1:
         result = {'result': 0, 'message': r"上传失败！"}
         os.remove(os.path.join(BASE_DIR, "media/" + pdf.name))
-        # print(1)
+        print(1)
         return JsonResponse(result)
     # 上传是否可以获取路径
     url = bucket.query_object("pdf", work_id + key + suffix)
@@ -175,7 +175,7 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
         return JsonResponse({'result': 0, 'message': '当前用户不是管理员'})
 
     data_json = json.loads(request.body.decode())
-    # print(data_json)
+    print(data_json)
     work_id = data_json.get('work_id')
     deal_result = data_json.get('deal_result')
     try:
@@ -195,7 +195,7 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
     except:
         return JsonResponse({'result': 0, 'message': '上传论文的用户不存在'})
     user_dic['unread_message_count'] = user_dic['unread_message_count'] + 1
-    # print(user_dic)
+    print(user_dic)
     cache.set(user_key, user_dic)
     celery_user_add_unread_message_count.delay(work_dic['user_id'])
     # 说明上传PDF正确
@@ -246,7 +246,7 @@ def manager_deal_upload_pdf(request):  # 管理员处理pdf上传申请
 def user_give_up_upload_pdf(request):
     user_id = request.user_id
     data_json = json.loads(request.body.decode())
-    # print(data_json)
+    print(data_json)
     work_id = data_json.get('work_id')
     author_id = data_json.get('author_id')
     try:

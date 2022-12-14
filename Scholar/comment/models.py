@@ -41,7 +41,7 @@ class CommentOfWorks(models.Model):
 
     def to_dic(self):
         comment_id_list = eval(self.comment_id_list)
-        # # print(comment_id_list)
+        # print(comment_id_list)
         return {
             'work_id': self.id,
             'comment_id_list': comment_id_list,
@@ -57,7 +57,7 @@ class CommentOfComments(models.Model):
 
     def to_dic(self):
         comment_id_list = eval(self.comment_id_list)
-        # # print(comment_id_list)
+        # print(comment_id_list)
         return {
             'comment_id': self.id,
             'comment_id_list': comment_id_list,

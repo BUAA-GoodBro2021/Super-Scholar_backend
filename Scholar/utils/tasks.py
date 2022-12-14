@@ -14,7 +14,7 @@ def celery_activate_user(user_id, email, avatar_url):
     user_list = User.objects.filter(username=user.username, is_active=False)
     if user_list:
         user_list.delete()
-    # print('celery', datetime.datetime.now())
+    print('celery', datetime.datetime.now())
     return user.to_dic()
 @app.task()
 def celery_add_user_id(user_id):
@@ -23,4 +23,4 @@ def celery_add_user_id(user_id):
     id_list.append(user_id)
     user_id_list.id_list = str(id_list)
     user_id_list.save()
-    # print("celery_add_user_id")
+    print("celery_add_user_id")

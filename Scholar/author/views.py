@@ -39,7 +39,7 @@ def quickSort(arr, low, high):
 def get_relate_net(request):
     if request.method == 'POST':
         data_json = json.loads(request.body.decode())
-        # print(data_json)
+        print(data_json)
         user_id = request.user_id
         author_id = data_json.get('author_id', '')
         request_body_json = {
@@ -93,7 +93,7 @@ def get_relate_net(request):
                                 }
                                 cooperation_author_list.append(co_author)
                     except:
-                        # print(author)
+                        print(author)
                         continue
         quickSort(cooperation_author_list, 0, cooperation_author_count - 1)
         return JsonResponse(

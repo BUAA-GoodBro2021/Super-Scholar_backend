@@ -15,19 +15,19 @@ open_alex = OpenAlex("853048903@qq.com")
 def user_claim_author(request):  # 用户申请认领门户
     if request.method == 'POST':
         data_json = json.loads(request.body.decode())
-        # print(data_json)
+        print(data_json)
         institution = data_json.get('institution', '机构')
         real_name = data_json.get('real_name', '真名')
         content = data_json.get('content', '默认申请内容')
         user_id = request.user_id
         author_id = data_json.get('author_id', '')
-        # print(author_id)
+        print(author_id)
         try:
             open_alex.get_single_author(author_id)
         except:
             return JsonResponse({'result': 0, 'message': '申请的作者不存在'})
         user_key, user_dic = cache_get_by_id('user', 'user', user_id)
-        # print(user_dic)
+        print(user_dic)
         if user_dic["is_professional"] == 0:
             return JsonResponse({'result': 0, 'message': '用户正在申请认领门户，请放弃当前申请后再次申请'})
         if user_dic["is_professional"] == 1:
@@ -62,7 +62,7 @@ def user_claim_author(request):  # 用户申请认领门户
 def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门户
     if request.method == 'POST':
         data_json = json.loads(request.body.decode())
-        # print(data_json)
+        print(data_json)
         user_id = request.user_id
         try:
             user_key, user_dic = cache_get_by_id('user', 'user', user_id)
@@ -90,7 +90,7 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
         user_dic['work_count'] = 0
         user_dic['institution'] = None
         user_dic['institution_id'] = None
-        # print(user_dic)
+        print(user_dic)
         cache.set(user_key, user_dic)
         celery_change_user_pass.delay(-1, user_id)
         return JsonResponse({'result': 1, 'message': '放弃成功'})
@@ -100,7 +100,7 @@ def user_give_up_author(request):  # 用户放弃申请门户或放弃当前门�
 def manager_check_claim(request):  # 管理员查看未处理申请
     if request.method == 'POST':
         data_json = json.loads(request.body.decode())
-        # print(data_json)
+        print(data_json)
         user_id = request.user_id
         try:
             super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
@@ -129,7 +129,7 @@ def manager_check_claim(request):  # 管理员查看未处理申请
 def manager_deal_claim(request):  # 管理员处理未处理申请
     if request.method == 'POST':
         data_json = json.loads(request.body.decode())
-        # print(data_json)
+        print(data_json)
         user_id = request.user_id
         try:
             super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
@@ -216,7 +216,7 @@ def manager_deal_claim(request):  # 管理员处理未处理申请
 @login_checker
 def manager_look_all_user(request):
     data_json = json.loads(request.body.decode())
-    # print(data_json)
+    print(data_json)
     user_id = request.user_id
     try:
         super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
@@ -238,7 +238,7 @@ def manager_look_all_user(request):
 @login_checker
 def manager_delete_user_author(request):
     data_json = json.loads(request.body.decode())
-    # print(data_json)
+    print(data_json)
     user_id = request.user_id
     try:
         super_user_key, super_user_dic = cache_get_by_id('user', 'user', user_id)
