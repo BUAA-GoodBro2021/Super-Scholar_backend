@@ -192,10 +192,10 @@ def delete_comment(request):
         if comment['level'] == 0:
             # 修改当前文章的缓存数据
             work_id = comment['work_id']
-            print("work id is ", work_id)
+            # print("work id is ", work_id)
 
             comment_of_work_key, comment_of_work = cache_get_by_id('comment', 'commentofworks', work_id)
-            print(comment_of_work['comment_id_list'])
+            # print(comment_of_work['comment_id_list'])
 
             comment_of_work['comment_id_list'].remove(comment_id)
 

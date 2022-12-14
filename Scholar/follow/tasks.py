@@ -25,7 +25,7 @@ def celery_delete_follow(user_id, author_id):
     try:
         Follow.objects.get(user_id=user_id, author_id=author_id).delete()
     except:
-        print("已经完成了删除！")
+        # print("已经完成了删除！")
 
     follow_of_user = FollowOfUser.objects.get(id=user_id)
 

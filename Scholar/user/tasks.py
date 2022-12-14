@@ -18,4 +18,4 @@ def celery_add_user_id(user_id):
     id_list.append(user_id)
     user_id_list.id_list = str(id_list)
     user_id_list.save()
-    print("celery_add_user_id")
+    # print("celery_add_user_id")

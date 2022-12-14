@@ -31,14 +31,14 @@ def add_comment_of_comment(comment_id, father_comment_id):
 
 @app.task
 def delay_delete_comment(comment_id, work_id, comment_level):
-    print(comment_id, work_id, comment_level)
+    # print(comment_id, work_id, comment_level)
 
     if comment_level == 0:
         try:
             comment_of_comment = CommentOfComments.objects.get(id=comment_id)
             comment_of_comment.delete()
         except:
-            print("Can't find the CommentOfComments!")
+            # print("Can't find the CommentOfComments!")
 
         try:
             comment_of_work = CommentOfWorks.objects.get(id=work_id)
@@ -49,13 +49,13 @@ def delay_delete_comment(comment_id, work_id, comment_level):
 
 
         except:
-            print("Can't find the CommentOfWorks!")
+            # print("Can't find the CommentOfWorks!")
 
         try:
             comment = Comment.objects.get(id=comment_id)
             comment.delete()
         except:
-            print("Can't find the Comment!")
+            # print("Can't find the Comment!")
 
         try:
             comments = Comment.objects.filter(ancestor_id=comment_id).all()
@@ -66,7 +66,7 @@ def delay_delete_comment(comment_id, work_id, comment_level):
                 comment_of_comment.delete()
 
         except:
-            print("Can't find the son_comments!")
+            # print("Can't find the son_comments!")
 
     elif comment_level == 1:
         try:
@@ -74,4 +74,4 @@ def delay_delete_comment(comment_id, work_id, comment_level):
             comment.is_deleted = True
             comment.save()
         except:
-            print("Can't find the Comment!")
+            # print("Can't find the Comment!")

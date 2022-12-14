@@ -71,10 +71,10 @@ def login_checker(func):
 
         # 获取token
         token = request.META.get('HTTP_AUTHORIZATION')
-        print(token)
+        # print(token)
         # 校验token信息
         payload = check_token(token)
-        print(payload)
+        # print(payload)
         # 校验失败
         if payload is None or payload['user_id'] <= 0:
             result = {'result': 0, 'message': '请先登录'}

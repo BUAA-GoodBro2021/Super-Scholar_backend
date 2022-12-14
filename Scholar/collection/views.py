@@ -26,7 +26,7 @@ def add_collection_package(request):
         test_name = package_name
         while user_package.filter(name=test_name).exists():
             test_name = package_name + f"({i})"
-            print(i)
+            # print(i)
             i = i + 1
 
         package_name = test_name
@@ -81,7 +81,7 @@ def change_package_name(request):
             test_name = package_name
             while user_package.filter(name=test_name).exists():
                 test_name = package_name + f"({i})"
-                print(i)
+                # print(i)
                 i = i + 1
                 package_name = test_name
 
@@ -154,7 +154,7 @@ def cancel_work(request):
         user_id = request.user_id
 
         work_id_list = data_json.get('work_id_list', [])
-        print(work_id_list)
+        # print(work_id_list)
 
         package_id = data_json.get('package_id', '-1')
 
@@ -200,11 +200,11 @@ def delete_collection_package(request):
         user_id = request.user_id
 
         package_id_list = data_json.get('package_id_list', [])
-        print(package_id_list)
+        # print(package_id_list)
 
         # 获取当前用户建立的所有收藏夹
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
-        print(user_dic['collection_id_list'])
+        # print(user_dic['collection_id_list'])
 
         # 异常处理
         for package_id in package_id_list:
@@ -213,7 +213,7 @@ def delete_collection_package(request):
                 return JsonResponse(result)
 
         for package_id in package_id_list:
-            print(package_id)
+            # print(package_id)
             package_key = 'collection:collection_package:' + str(package_id)
             # 修改缓存
             cache.delete(package_key)
@@ -244,7 +244,7 @@ def get_collection_package_list(request):
         package_list = []
         user_key, user_dic = cache_get_by_id('user', 'collectionofuser', user_id)
         package_id_list = user_dic['collection_id_list']
-        print(package_id_list)
+        # print(package_id_list)
 
         for package_id in package_id_list:
             package_key, package_dic = cache_get_by_id('collection', 'collectionpackage', package_id)

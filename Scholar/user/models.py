@@ -76,7 +76,7 @@ class FollowOfUser(models.Model):
 
     def to_dic(self):
         follow_id_list = eval(self.follow_id_list)
-        print(follow_id_list)
+        # print(follow_id_list)
         return {'user_id': self.id, 'follow_id_list': follow_id_list}
 
 
@@ -89,6 +89,6 @@ class CollectionOfUser(models.Model):
 
     def to_dic(self):
         collection_id_list = eval(self.collection_id_list)
-        print(collection_id_list)
+        # print(collection_id_list)
 
         return {'user_id': self.id, 'collection_id_list': collection_id_list}

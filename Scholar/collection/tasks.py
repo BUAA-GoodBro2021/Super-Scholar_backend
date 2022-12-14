@@ -19,7 +19,7 @@ def add_collection_package_delay(package_id, user_id):
     cp = CollectionOfUser.objects.get(id=user_id)
 
     collection_id_list = eval(cp.collection_id_list)
-    print(collection_id_list)
+    # print(collection_id_list)
 
     collection_id_list.append(package_id)
 
@@ -54,7 +54,7 @@ def celery_cancel_collect(package_id, work_id):
 @app.task
 def celery_delete_collection_package(package_id_list, user_id):
     for package_id in package_id_list:
-        print(package_id)
+        # print(package_id)
         # 删除其中收藏的论文
         Collection.objects.filter(collection_package_id=package_id).delete()
 
@@ -65,7 +65,7 @@ def celery_delete_collection_package(package_id_list, user_id):
         cp = CollectionOfUser.objects.get(id=user_id)
 
         collection_id_list = eval(cp.collection_id_list)
-        print(collection_id_list)
+        # print(collection_id_list)
         collection_id_list.remove(package_id)
 
         cp.collection_id_list = str(collection_id_list)

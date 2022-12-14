@@ -40,7 +40,7 @@ class Bucket:
             try:
                 self.client.create_bucket(Bucket=bucket_name + self.app_id, ACL=access)
             except Exception as e:
-                print(e)
+                # print(e)
                 return -1
             else:
                 return 1
@@ -64,7 +64,7 @@ class Bucket:
                         MAXThread=10
                     )
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     return -1
             return 1
         if type(bucket_name) == str:
@@ -77,7 +77,7 @@ class Bucket:
                     MAXThread=10
                 )
             except Exception as e:
-                print(e)
+                # print(e)
                 return -1
             else:
                 return 1
@@ -96,7 +96,7 @@ class Bucket:
                         Key=key_name
                     )
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     return -1
             return 1
         if type(bucket_name) == str:
@@ -106,7 +106,7 @@ class Bucket:
                     Key=key_name
                 )
             except Exception as e:
-                print(e)
+                # print(e)
                 return -1
             else:
                 return 1
@@ -125,7 +125,7 @@ class Bucket:
                     Key=key_name
                 )
             except Exception as e:
-                print(e)
+                # print(e)
                 return None
         return None
 
@@ -146,7 +146,7 @@ class Bucket:
                     DetectType=0xB
                 )
             except Exception as e:
-                print(e)
+                # print(e)
                 pass
             else:
                 score = int(response.get('Score'))
@@ -179,7 +179,7 @@ class Bucket:
                     CallbackVersion='Detail'
                 )
             except Exception as e:
-                print(e)
+                # print(e)
                 pass
             else:
                 job_id = response.get('JobsDetail').get('JobId')
