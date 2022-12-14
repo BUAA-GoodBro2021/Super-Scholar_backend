@@ -12,14 +12,14 @@ def partition(arr, low, high):
     pivot = arr[high]
 
     for j in range(low, high):
-
+        print(1)
         # 当前元素小于或等于 pivot
         if arr[j]['cooperation_author_count'] >= pivot['cooperation_author_count']:
             i = i + 1
             arr[i], arr[j] = arr[j], arr[i]
 
     arr[i + 1], arr[high] = arr[high], arr[i + 1]
-    return (i + 1)
+    return i + 1
 
 
 # arr[] --> 排序数组
@@ -52,9 +52,7 @@ def get_relate_net(request):
                 "per_page": 200
             }
         }
-
         author_works = cache_get_list_by_diophila(request_body_json)
-
         cooperation_author_count = 0
         cooperation_author_list = []
         for work in author_works[0]['results']:
@@ -69,7 +67,9 @@ def get_relate_net(request):
             if list_length == 1:
                 continue
             else:
+
                 for author in author_list:
+
                     try:
                         if author['author']['id'].split('/')[-1] == author_id:
                             continue
@@ -95,7 +95,9 @@ def get_relate_net(request):
                     except:
                         print(author)
                         continue
-        quickSort(cooperation_author_list, 0, cooperation_author_count - 1)
+
+        cooperation_author_list.sort(key=lambda s:s['cooperation_author_count'])
+
         return JsonResponse(
             {'result': 1, 'message': '获取成功', 'cooperation_author_count': cooperation_author_count,
              'cooperation_author_list': cooperation_author_list})
